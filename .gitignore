@@ -1,0 +1,94 @@
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET Core
+**/bin/
+**/obj/
+**/Properties/launchSettings.json
+!**/Properties/launchSettings.template.json # If you use a template for launchSettings
+
+# Rider
+**/.idea/
+
+# Build results
+**/[Dd]ebug/
+**/[Rr]elease/
+**/[Bb]uild/
+**/[Dd]ist/
+**/publish/
+**/out/
+
+# User-specific files
+**/*.DotSettings.user
+**/*.log
+**/*.log.*
+**/*.DS_Store
+**/*.Spotlight-V100
+**/*.Trashes
+**/ehthumbs.db
+**/Thumbs.db
+
+# Secrets and environment files
+**/*.env
+**/appsettings.Development.json
+**/secrets.json
+
+# Node.js / Vite / TypeScript / Tailwind CSS
+**/node_modules/
+**/dist/
+**/.cache/
+**/*.tsbuildinfo
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/lerna-debug.log*
+**/.pnp/
+**/.pnp.js
+**/.pnp.cjs
+**/.yarn/cache
+**/.yarn/unplugged
+**/.yarn/build-state.yml
+**/.yarn/install-state.gz
+**/vite.config.ts.timestamp-*
+**/vite.config.js.timestamp-*
+
+# NuGet Packages
+*.nupkg
+# The packages folder can be ignored if it is committed to source control (used by GitHub Actions, Docker builds, etc.)
+# **/packages/*
+# except build/, native/, and contentFiles/ folders when building an SDK style project:
+# !**/packages/*/build/
+# !**/packages/*/native/
+# !**/packages/*/contentFiles/
+
+# Windows files
+Desktop.ini
+
+# Local History for Visual Studio
+.localhistory/
+
+# Test results
+*.trx
+*.html
+*.xml
+*.coverage
+*.coverlet.json
+**/TestResults/
+
+# Fakes
+GeneratedFakes/
+
+# If you're using Docker
+Dockerfile.local
+.dockerignore
+
+# If you're using specific IDE extensions
+# Example for Wallaby.js
+.wallaby.js
+.wallaby.ts
