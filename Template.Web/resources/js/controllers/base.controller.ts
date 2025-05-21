@@ -1,3 +1,5 @@
+import { Application } from '../core/application';
+
 /**
  * BaseController
  *
@@ -7,9 +9,16 @@
  */
 export abstract class BaseController {
   protected el: HTMLElement;
+  protected app: Application;
 
-  constructor(el: HTMLElement) {
+  constructor(el: HTMLElement, app: Application) {
     this.el = el;
-  };
+    this.app = app;
+  }
+
+  protected getService<T = any>(name: string): T {
+    const serviceFactory = this.app.resolve<() => T>(name);
+    return serviceFactory();
+  }
 
 }
