@@ -1,6 +1,7 @@
+import { Application } from './core/application';
 import '../css/app.css';
 import './bootstrap';
-import { Application } from './core/application';
+import $ from './core/dom';
 
 /**
  * Application entry point for a JavaScript application.
@@ -10,8 +11,13 @@ import { Application } from './core/application';
  */
 const app = new Application();
 
+// Register the global $ helper as a service for use in any controller
 app
+  .provide('dom', () => $)
   //.provide('store', () => new Store())
-  .register('counter', () => import('./controllers/counter.controller.ts'))
+  .register('counter', () => import('./controllers/counter.controller.ts'));
 
-app.boot();
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', () => {
+  app.boot();
+});
