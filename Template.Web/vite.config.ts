@@ -1,5 +1,7 @@
 import { defineConfig, type UserConfig } from 'vite'
 import { resolve } from 'path'
+import tailwindcss from '@tailwindcss/vite'
+
 
 export default defineConfig(({ command }) => {
   const isProduction = command === 'build'
@@ -89,9 +91,9 @@ export default defineConfig(({ command }) => {
     },
 
     // Add plugins if you are using them (e.g., for Vue, React, Tailwind CSS)
-    // plugins: [
-    //   // Example: tailwindcss(),
-    // ],
+    plugins: [
+      tailwindcss(),
+    ],
   }
 
   return config;
