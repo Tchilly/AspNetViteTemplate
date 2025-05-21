@@ -4,7 +4,7 @@ import './bootstrap';
 import $ from './core/dom';
 
 /**
- * Application entry point for a JavaScript application.
+ * Application initialization
  *
  * This file is responsible for bootstrapping the application, registering
  * services, and initializing the application.
@@ -17,7 +17,5 @@ app
   //.provide('store', () => new Store())
   .register('counter', () => import('./controllers/counter.controller.ts'));
 
-// Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', () => {
-  app.boot();
-});
+app.boot();
+

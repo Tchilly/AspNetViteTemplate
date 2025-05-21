@@ -9,5 +9,4 @@ export default class CounterController extends BaseController {
   render() {
     console.log('CounterController render on', this.el);
   }
-
 }
