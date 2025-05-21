@@ -1,9 +1,12 @@
 using Vite.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var mvcBuilder = builder.Services.AddRazorPages();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
 // Add the Vite services
 builder.Services.AddViteServices(options =>
@@ -12,6 +15,11 @@ builder.Services.AddViteServices(options =>
     options.Server.Https = false;
     options.Manifest = "manifest.json";
 });
+
+if (builder.Environment.IsDevelopment())
+{
+    mvcBuilder.AddRazorRuntimeCompilation();
+}
 
 var app = builder.Build();
 
