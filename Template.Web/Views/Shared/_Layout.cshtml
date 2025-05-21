@@ -5,7 +5,8 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Template.Web</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <link rel="stylesheet" vite-href="~/js/app.ts" />
 </head>
 <body>
     <header>
@@ -40,7 +41,8 @@
             &copy; 2025 - Template.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script type="module" src="~/js/index.ts" asp-append-version="true"></script>
+
+    <script type="module" vite-src="~/js/app.ts" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

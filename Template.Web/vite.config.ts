@@ -5,6 +5,8 @@ export default defineConfig(({ command }) => {
   const isProduction = command === 'build'
 
   const config: UserConfig = {
+    appType: 'custom',
+
     // Set the root directory for Vite to your 'resources' folder
     root: resolve(__dirname, 'resources'),
 

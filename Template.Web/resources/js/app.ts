@@ -4,3 +4,5 @@ import './bootstrap';
 /**
  * Application entry point for a JavaScript application.
  */
+console.log('Hi from app.ts');
+
