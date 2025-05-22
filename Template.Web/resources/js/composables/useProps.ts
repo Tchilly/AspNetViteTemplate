@@ -5,6 +5,13 @@
  * @param defaultValue - Optional default value to return if the attribute is missing or JSON is invalid.
  * @returns The parsed JSON object, or the defaultValue if provided, or null.
  */
+
+// Overload for when a non-null defaultValue is provided: guarantees T is returned.
+export function useProps<T>(el: HTMLElement, defaultValue: T): T;
+// Overload for when no defaultValue (or null) is provided: T | null may be returned.
+export function useProps<T>(el: HTMLElement, defaultValue?: null): T | null;
+
+// Implementation (remains the same, as it already handles the logic correctly)
 export function useProps<T = any>(el: HTMLElement, defaultValue: T | null = null): T | null {
   const propsString = el.dataset.props;
 

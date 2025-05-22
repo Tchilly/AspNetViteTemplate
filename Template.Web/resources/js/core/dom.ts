@@ -32,8 +32,11 @@ export class DOMWrapper {
     return this;
   }
 
-  addClass(className: string): this {
-    this.elements.forEach(el => el.classList.add(className));
+  addClass(classNames: string): this {
+    const classes = classNames.split(' ').filter(cls => cls.trim() !== '');
+    this.elements.forEach(el => {
+      el.classList.add(...classes);
+    });
     return this;
   }
 

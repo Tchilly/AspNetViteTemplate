@@ -1,67 +1,78 @@
 import { Application } from "../core/application";
 import type { MyServiceType } from '../services/mock.service';
-import { useDom } from '../composables/useDom';
+import { useDom } from '../composables/useDom'; // Assuming DOMWrapper is exported
 import { useProps } from '../composables/useProps';
 
+/**
+ * @interface CounterProps
+ * Defines the properties accepted by the CounterComponent.
+ * @property initialCount - Optional initial value for the counter. Defaults to 0.
+ */
 interface CounterProps {
-  initialCount?: number;
+  initialCount?: number | null;
 }
 
 /**
- * anotherMethodFunction
+ * _anotherMethodFunction (Private)
  *
- * This function is an example of a method that can be called from the CounterController.
- * It uses the Application instance to resolve services and manipulate the DOM.
+ * An example utility function demonstrating service resolution and DOM manipulation.
+ * This function is intended for internal use within the CounterComponent's scope.
  *
- * @param app - The application instance
+ * @param app - The application instance, used to resolve services.
  */
-function anotherMethodFunction(app: Application) {
+function _anotherMethodFunction(app: Application): void {
   const $ = useDom();
-  console.log("anotherMethodFunction called");
+  console.log("_anotherMethodFunction called");
   $('body').toggleClass('another-method-triggered-functional');
 
-  // If you needed to use a service from app:
+  // Example of resolving a service from the application instance
   const myService = app.resolve<MyServiceType>('myServiceName');
   console.log(myService.getMessage());
 }
 
 /**
- * CounterComponent
+ * @module CounterComponent
+ * A functional component that displays a counter with an increment button.
  *
- * This is a functional component that serves as a controller for the counter component.
- * It is responsible for rendering the component and handling events.
- * It uses the Application instance to resolve services and manage state.
- * It can receive an `initialCount` via a `data-props` attribute.
+ * It initializes with a count, optionally provided via a `data-props` HTML attribute,
+ * and allows the user to increment this count. It also demonstrates service
+ * resolution and basic DOM manipulation using composables.
  *
- * @param el - The HTML element to attach the controller to, may contain `data-props` e.g. `data-props='{"initialCount": 5}'`
- * @param app - The application instance
+ * @param el - The HTMLElement to which this component is bound.
+ *             Expected to have a `data-component="counter"` attribute.
+ *             Can also accept `data-props='{"initialCount": number}'` to set the initial counter value.
+ * @param app - The global application instance, used for service resolution and other app-level interactions.
  */
 export default function CounterComponent(el: HTMLElement, app: Application): void {
   const $ = useDom();
-  const props = useProps<CounterProps>(el, { initialCount: 0 });
-  const elWrapper = $(el); // Wrap el once for consistent DOM manipulation
+  const { initialCount } = useProps<CounterProps>(el, { initialCount: 0 });
+  const elWrapper = $(el);
 
-  let currentCount = props?.initialCount ?? 0;
+  let currentCount: number = initialCount ?? 0;
 
-  const render = () => {
-    console.log('CounterComponent render on', el, 'with props:', props);
+  /**
+   * Initializes the counter UI, creates elements, and attaches necessary event handlers.
+   * This function is called once when the component is bootstrapped.
+   */
+  const initializeCounter = (): void => {
+    console.log('CounterComponent: Initializing UI on', el, 'with initialCount:', initialCount);
 
-    // Create some elements
     const countDisplay = $('<span>').text(`Count: ${currentCount} `);
-    const button = $('<button>').text('Increment');
+    const button = $('<button>').text('Increment').addClass('bg-blue-500 text-white px-4 py-2 rounded');
 
-    // Append elements to the wrapper
+    elWrapper.text(''); // Clear any existing content
     elWrapper.append(countDisplay);
     elWrapper.append(button);
 
-    // Add a click event listener to the button
+    // Attach event handler directly
     button.on('click', () => {
       currentCount++;
-      countDisplay.text(`Count: ${currentCount} `); // Update text, maintaining the space
+      countDisplay.text(`Count: ${currentCount} `);
       console.log('Button clicked! Element:', el, 'New count:', currentCount);
-      anotherMethodFunction(app); // Pass app to the function
+      _anotherMethodFunction(app); // Call example utility function
     });
   };
 
-  render();
+  // Initialize the component
+  initializeCounter();
 }
