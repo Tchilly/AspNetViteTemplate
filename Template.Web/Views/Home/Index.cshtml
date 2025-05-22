@@ -8,5 +8,8 @@
       <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
     </div>
 
-    <div data-component="counter" data-props='{"initialCount": 15}'></div>
+    <div data-component="counter" data-props='{"initialCount": 15}'>
+      <span data-counter-display>Count: 0</span> <!-- Initial text can be set here or updated by component -->
+      <button data-counter-button class="bg-blue-500 text-white px-4 py-2 rounded">Increment</button>
+    </div>
 </div>

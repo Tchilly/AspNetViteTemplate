@@ -57,14 +57,11 @@ export default function CounterComponent(el: HTMLElement, app: Application): voi
   const initializeCounter = (): void => {
     console.log('CounterComponent: Initializing UI on', el, 'with initialCount:', initialCount);
 
-    const countDisplay = $('<span>').text(`Count: ${currentCount} `);
-    const button = $('<button>').text('Increment').addClass('bg-blue-500 text-white px-4 py-2 rounded');
+    const countDisplay = elWrapper.find('[data-counter-display]');
+    const button = elWrapper.find('[data-counter-button]');
 
-    elWrapper.text(''); // Clear any existing content
-    elWrapper.append(countDisplay);
-    elWrapper.append(button);
+    countDisplay.text(`Count: ${currentCount} `);
 
-    // Attach event handler directly
     button.on('click', () => {
       currentCount++;
       countDisplay.text(`Count: ${currentCount} `);
