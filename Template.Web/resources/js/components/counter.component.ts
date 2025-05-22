@@ -2,6 +2,7 @@ import { Application } from "../core/application";
 import type { MyServiceType } from '../services/mock.service';
 import { useDom } from '../composables/useDom'; // Assuming DOMWrapper is exported
 import { useProps } from '../composables/useProps';
+import type { DOMWrapper } from "../core/dom";
 
 /**
  * @interface CounterProps
@@ -51,6 +52,13 @@ export default function CounterComponent(el: HTMLElement, app: Application): voi
   let currentCount: number = initialCount ?? 0;
 
   /**
+   * Updates the text of the count display element.
+   */
+  const updateCountDisplay = (countDisplay: DOMWrapper): void => {
+    countDisplay.text(`Count: ${currentCount} `);
+  };
+
+  /**
    * Initializes the counter UI, creates elements, and attaches necessary event handlers.
    * This function is called once when the component is bootstrapped.
    */
@@ -60,12 +68,12 @@ export default function CounterComponent(el: HTMLElement, app: Application): voi
     const countDisplay = elWrapper.find('[data-counter-display]');
     const button = elWrapper.find('[data-counter-button]');
 
-    countDisplay.text(`Count: ${currentCount} `);
+    updateCountDisplay(countDisplay);
 
     button.on('click', () => {
       currentCount++;
-      countDisplay.text(`Count: ${currentCount} `);
-      console.log('Button clicked! Element:', el, 'New count:', currentCount);
+      updateCountDisplay(countDisplay);
+      console.log('Button clicked! Element:', button.elements, 'New count:', currentCount);
       _anotherMethodFunction(app); // Call example utility function
     });
   };
