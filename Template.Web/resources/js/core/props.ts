@@ -13,6 +13,15 @@ export class Props {
   /**
    * Helper for defining props with optional cache support.
    * Returns the defaults for type inference and declaration. Optionally interacts with cache.
+   *
+   * @param cache - The cache service instance to use for storing/retrieving props.
+   * @param defaults - The default props object for the component.
+   * @param cacheKey - (Optional) The key to use for caching the props. If provided, enables caching.
+   * @param cacheOptions - (Optional) Cache options:
+   *   - ttl: Time to live (TTL) for the cache entry, in seconds. Determines how long the value will remain in the cache before expiring.
+   *   - tag: Optional tag for group invalidation.
+   *   - storage: Where to store the cache: 'memory', 'local', or 'cookie'.
+   * @returns The default props object, possibly cached.
    */
   static defineProps<T extends Record<string, any>>(
     cache: any,

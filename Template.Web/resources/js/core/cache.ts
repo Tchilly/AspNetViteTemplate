@@ -8,7 +8,7 @@ export interface CacheOptions {
   /**
    * Time to live (TTL) for the cache entry, in seconds.
    * Determines how long the value will remain in the cache before expiring.
-   * For example, a value of 10 means the entry will expire after 10 seconds.
+   * For example, a value of 60 means the entry will expire after 60 seconds.
    */
   ttl?: number;
   /**

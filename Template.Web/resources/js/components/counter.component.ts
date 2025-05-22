@@ -39,7 +39,7 @@ export default class CounterComponent extends BaseComponent {
     this.myService = this.app.resolve('myServiceName');
     this.cache = this.app.resolve('cache');
 
-    // Define default props and cache for 10 seconds in localStorage
+    // Define default props and cache for 60 seconds in localStorage
     const defaultProps = this.defineProps<CounterProps>(
       { initialCount: 1 },
       'counter-initial',
