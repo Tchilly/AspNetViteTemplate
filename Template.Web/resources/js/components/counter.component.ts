@@ -77,8 +77,12 @@ export default class CounterComponent extends BaseComponent {
   }
 
   private bindEvents(): void {
-    const button = this.ref('[data-counter-button]');
-    button?.addEventListener('click', () => this.increment());
+    this.ref('[data-counter-button]')?.on?.('click', () => this.increment());
+    this.ref('[data-counter-decrement]')?.on?.('click', () => this.decrement());
+    this.ref('[data-counter-reset]')?.on?.('click', () => this.reset());
+    this.ref('[data-counter-set150]')?.on?.('click', () => this.setCount(150));
+    this.ref('[data-counter-clearcache]')?.on?.('click', () => this.clearCache());
+    this.ref('[data-counter-fakefetch]')?.on?.('click', () => this.fakeFetch());
   }
 
   private increment(): void {
@@ -90,6 +94,52 @@ export default class CounterComponent extends BaseComponent {
       this.myService.performAction();
     }
     console.log('Button clicked! New count:', this.currentCount);
+  }
+
+  private decrement(): void {
+    this.currentCount--;
+    this.render();
+    this.cache.set('counter.currentCount', this.currentCount);
+    if (this.myService) {
+      this.myService.performAction();
+    }
+    console.log('Decrement clicked! New count:', this.currentCount);
+  }
+
+  private reset(): void {
+    this.currentCount = this.props.initialCount ?? 0;
+    this.render();
+    this.cache.set('counter.currentCount', this.currentCount);
+    if (this.myService) {
+      this.myService.performAction();
+    }
+    console.log('Reset clicked! Count reset to:', this.currentCount);
+  }
+
+  private setCount(val: number): void {
+    this.currentCount = val;
+    this.render();
+    this.cache.set('counter.currentCount', this.currentCount);
+    if (this.myService) {
+      this.myService.performAction();
+    }
+    console.log('Set count clicked! Count set to:', this.currentCount);
+  }
+
+  private clearCache(): void {
+    this.cache.invalidate('counter.currentCount');
+    if (this.myService) {
+      this.myService.performAction();
+    }
+    console.log('Cache cleared for counter.currentCount');
+  }
+
+  private fakeFetch(): void {
+    if (this.myService) {
+      this.myService.performAction();
+      console.log('[Demo] Here you could implement a fetch/post request.');
+    }
+    console.log('Fake fetch/post button clicked!');
   }
 
   private render(): void {

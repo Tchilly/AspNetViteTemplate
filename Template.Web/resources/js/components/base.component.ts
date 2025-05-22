@@ -1,6 +1,5 @@
 import { Application } from "@/core/application";
-import { Props, defineProps as definePropsHelper } from '@/core/props';
-import { getOr } from '@/core/cache';
+import { Props } from '@/core/props';
 
 export abstract class BaseComponent {
   protected el: HTMLElement;
@@ -13,11 +12,22 @@ export abstract class BaseComponent {
 
   /**
    * Finds the first element that matches the specified selector string within the component's root element.
+   * Adds a convenience `.on` method for event binding, similar to jQuery/DOMWrapper.
    * @param selector A DOMString containing one or more selectors to match.
    * @returns The first Element within the component's root element that matches the specified set of selectors, or null if no such element is found.
    */
-  protected ref<T extends HTMLElement>(selector: string): T | null {
-    return this.el.querySelector<T>(selector);
+  protected ref<T extends HTMLElement>(selector: string): (T & { on?: (event: string, handler: EventListenerOrEventListenerObject) => T }) | null {
+    const el = this.el.querySelector<T>(selector);
+    if (el) {
+      // Attach a convenience 'on' method if not already present
+      if (!(el as any).on) {
+        (el as any).on = function(event: string, handler: EventListenerOrEventListenerObject) {
+          this.addEventListener(event, handler);
+          return this;
+        };
+      }
+    }
+    return el as any;
   }
 
   /**
@@ -36,42 +46,14 @@ export abstract class BaseComponent {
    */
   protected defineProps<T extends Record<string, any>>(defaults?: T, cacheKey?: string, cacheOptions?: Record<string, any>): T {
     // @ts-expect-error: cache is injected by convention in subclasses
-    return definePropsHelper(this.cache, defaults, cacheKey, cacheOptions);
-  }
-
-  /**
-   * Get a value from cache, or compute/store fallback if not present. Fallback can be a value or a function.
-   */
-  getOr<T>(key: string, fallback: T | (() => T), options?: Record<string, any>): T {
-    // @ts-expect-error: cache is injected by convention in subclasses
-    return getOr(this.cache, key, fallback, options);
+    return Props.defineProps(this.cache, defaults, cacheKey, cacheOptions);
   }
 
   /**
    * Reads and merges props from the DOM element's data-props attribute with defaults.
-   *
-   * Usage:
-   *   this.useProps<T>({ key: 'value' })
-   *   - Merges the provided defaults with any data-props on the element.
-   *   - Returns the merged props object.
-   *   this.useProps<T>()
-   *   - Returns an empty object if no defaults are provided and no data-props exist.
-   *
-   * Note: Fluent usage (withDefaults) is no longer supported. Always provide defaults directly if needed.
+   * Usage: this.useProps<T>({ key: 'value' })
    */
   protected useProps<T extends Record<string, any>>(defaults?: T): T {
-    if (defaults !== undefined) {
-      const propsString = this.el.dataset.props;
-      try {
-        if (propsString) {
-          return { ...defaults, ...JSON.parse(propsString) };
-        }
-      } catch (error) {
-        console.error("Error parsing data-props JSON:", error, propsString);
-      }
-      return defaults;
-    }
-    // If no defaults provided, return empty object
-    return {} as T;
+    return Props.useProps(this.el, defaults);
   }
 }

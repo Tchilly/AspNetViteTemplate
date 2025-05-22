@@ -5,11 +5,28 @@
 <div>
     <heading size="h1">@ViewData["Title"]</heading>
     <div class="prose">
-      <p>Learn sdfsdfsdsdfsdf about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+      <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
     </div>
 
-    <div data-component="counter" data-props='{"initialCount": 0}'>
-      <span data-counter-display>Count: 0</span> <!-- Initial text can be set here or updated by component -->
-      <button data-counter-button class="bg-blue-500 text-white px-4 py-2 rounded">Increment</button>
+    <div data-component="counter" data-props='{"initialCount": 1}'>
+      <span data-counter-display>Count: 0</span>
+      <div class="flex gap-2 mt-2">
+        <button data-counter-button class="bg-blue-500 text-white px-4 py-2 rounded">Increment</button>
+        <button data-counter-decrement class="bg-red-500 text-white px-4 py-2 rounded">Decrement</button>
+        <button data-counter-reset class="bg-gray-500 text-white px-4 py-2 rounded">Reset</button>
+        <button data-counter-set150 class="bg-green-500 text-white px-4 py-2 rounded">Set to 150</button>
+        <button data-counter-clearcache class="bg-yellow-500 text-black px-4 py-2 rounded">Clear Cache</button>
+        <button data-counter-fakefetch class="bg-purple-500 text-white px-4 py-2 rounded">Fake Fetch/Post</button>
+      </div>
+      <div class="mt-2 text-xs text-gray-500">
+        <ul>
+          <li>Increment: Increases the count and persists it in cache for 10s.</li>
+          <li>Decrement: Decreases the count and persists it in cache for 10s.</li>
+          <li>Reset: Resets the count to initial value and updates cache.</li>
+          <li>Set to 150: Sets the count to 150 and updates cache.</li>
+          <li>Clear Cache: Removes the cached count (next reload uses initial).</li>
+          <li>Fake Fetch/Post: Console logs a message via MyService (not implemented).</li>
+        </ul>
+      </div>
     </div>
 </div>
