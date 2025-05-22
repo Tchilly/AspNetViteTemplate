@@ -1,7 +1,7 @@
 import { Application } from "@/core/application";
 import { BaseComponent } from '@/components/base.component';
 import type { MyServiceType } from '@/services/mock.service';
-import { CacheService } from '@/core/cache';
+import { CacheService } from '@/services/cache.service';
 
 /**
  * @interface CounterProps

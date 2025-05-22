@@ -215,10 +215,16 @@ export class Dom {
           const parent = dom.parent();
           return parent.elements[0] || null;
         },
-        attr: (name, value?) => {
-          if (typeof value === 'undefined') return dom.attr(name);
-          dom.attr(name, value);
-          return el;
+        attr: ((name: string, value?: string) => {
+          if (typeof value === 'undefined') {
+            return dom.attr(name);
+          } else {
+            dom.attr(name, value);
+            return el;
+          }
+        }) as {
+          (name: string): string;
+          (name: string, value: string): HTMLElement;
         },
         removeAttr: (name) => { dom.removeAttr(name); return el; },
         val: (value?) => {
@@ -265,7 +271,8 @@ export interface DomChainableMethods {
   find(selector: string): HTMLElement | null;
   children(): HTMLElement | null;
   parent(): HTMLElement | null;
-  attr(name: string, value?: string): string | HTMLElement;
+  attr(name: string): string;
+  attr(name: string, value: string): HTMLElement;
   removeAttr(name: string): HTMLElement;
   val(value?: string): string | HTMLElement;
   css(property: string | Record<string, string>, value?: string): HTMLElement;

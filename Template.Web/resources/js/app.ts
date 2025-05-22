@@ -2,7 +2,8 @@ import { Application } from './core/application';
 import '../css/app.css';
 import './bootstrap';
 import { MockService } from './services/mock.service';
-import { CacheService, LocalStorageCacheDriver } from '@/core/cache';
+import { CacheService } from '@/services/cache.service';
+import { LocalStorageCacheDriver } from '@/core/cache';
 
 /**
  * Application initialization
