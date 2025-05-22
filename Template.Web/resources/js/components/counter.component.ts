@@ -1,7 +1,11 @@
 import { Application } from "../core/application";
-import { useDom } from '../composables/useDom';
 import type { MyServiceType } from '../services/mock.service';
-import { useProps } from '../composables/useProps'; // Import useProps
+import { useDom } from '../composables/useDom';
+import { useProps } from '../composables/useProps';
+
+interface CounterProps {
+  initialCount?: number;
+}
 
 /**
  * anotherMethodFunction
@@ -21,10 +25,6 @@ function anotherMethodFunction(app: Application) {
   console.log(myService.getMessage());
 }
 
-interface CounterProps {
-  initialCount?: number;
-}
-
 /**
  * CounterComponent
  *
@@ -39,22 +39,22 @@ interface CounterProps {
 export default function CounterComponent(el: HTMLElement, app: Application): void {
   const $ = useDom();
   const props = useProps<CounterProps>(el, { initialCount: 0 });
+  const elWrapper = $(el); // Wrap el once for consistent DOM manipulation
 
   let currentCount = props?.initialCount ?? 0;
 
   const render = () => {
     console.log('CounterComponent render on', el, 'with props:', props);
 
-    const countDisplay = $('<span>').text(`Count: ${currentCount} `); // Added space after currentCount
+    // Create some elements
+    const countDisplay = $('<span>').text(`Count: ${currentCount} `);
     const button = $('<button>').text('Increment');
-    
-    el.innerHTML = ''; // Clear element using standard DOM API
-    
-    // Append elements sequentially
-    const elWrapper = $(el);
+
+    // Append elements to the wrapper
     elWrapper.append(countDisplay);
     elWrapper.append(button);
 
+    // Add a click event listener to the button
     button.on('click', () => {
       currentCount++;
       countDisplay.text(`Count: ${currentCount} `); // Update text, maintaining the space
