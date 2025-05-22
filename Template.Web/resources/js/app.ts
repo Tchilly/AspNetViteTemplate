@@ -1,6 +1,7 @@
 import { Application } from './core/application';
 import '../css/app.css';
 import './bootstrap';
+import { MockService } from './services/mock.service';
 
 /**
  * Application initialization
@@ -12,8 +13,8 @@ const app = new Application();
 
 // Register services
 app
-  //.provide('store', () => new Store())
-  .register('counter', () => import('./controllers/counter.controller.ts'));
+  .provide('myServiceName', () => new MockService())
+  .register('counter', () => import('./components/counter.component.ts'));
 
 app.boot();
 

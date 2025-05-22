@@ -1,13 +1,16 @@
-type ControllerConstructor = new (el: HTMLElement, app: Application) => any;
-type ControllerLoader = () => Promise<{ default: ControllerConstructor }>;
-type ServiceFactory = () => any;
+// New types for functional components
+export type FunctionalComponent = (el: HTMLElement, app: Application) => void | Promise<void>; // Can be sync or async
+export type FunctionalComponentLoader = () => Promise<{ default: FunctionalComponent }>;
+
+// Define ServiceFactory - adjust if your factory is more complex
+export type ServiceFactory = () => any;
 
 export class Application {
-  private controllers: Record<string, ControllerLoader> = {};
-  private services: Map<string, any> = new Map();
+  private components: Record<string, FunctionalComponentLoader> = {}; // New type
+  private services: Map<string, ServiceFactory> = new Map(); // Store factory
 
-  register(name: string, loader: ControllerLoader): this {
-    this.controllers[name] = loader;
+  register(name: string, loader: FunctionalComponentLoader): this { // New signature
+    this.components[name] = loader;
     return this;
   }
 
@@ -17,19 +20,19 @@ export class Application {
   }
 
   resolve<T = any>(name: string): T {
-    const service = this.services.get(name);
-    if (!service) {
+    const factory = this.services.get(name); // Get the factory
+    if (!factory) {
       throw new Error(`Service "${name}" not registered`);
     }
-    return service;
+    return factory() as T; // Execute the factory to get the instance
   }
 
   async boot(): Promise<void> {
-    document.querySelectorAll<HTMLElement>('[data-controller]').forEach(async (el) => {
-      const name = el.dataset.controller;
-      if (!name || !this.controllers[name]) return;
-      const module = await this.controllers[name]();
-      new module.default(el, this);
+    document.querySelectorAll<HTMLElement>('[data-component]').forEach(async (el) => {
+      const name = el.dataset.component;
+      if (!name || !this.components[name]) return;
+      const module = await this.components[name]();
+      module.default(el, this); // New: call the function
     });
   }
 }
