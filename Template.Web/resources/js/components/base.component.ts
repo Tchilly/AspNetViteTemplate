@@ -1,33 +1,26 @@
 import { Application } from "@/core/application";
 import { Props } from '@/core/props';
+import { Dom } from '@/core/dom';
 
 export abstract class BaseComponent {
   protected el: HTMLElement;
   protected app: Application;
+  protected dom: Dom;
 
   constructor(el: HTMLElement, app: Application) {
     this.el = el;
     this.app = app;
+    this.dom = new Dom(el);
   }
 
   /**
    * Finds the first element that matches the specified selector string within the component's root element.
-   * Adds a convenience `.on` method for event binding, similar to jQuery/DOMWrapper.
+   * Adds all Dom methods as bound methods to the element, for chainable usage.
    * @param selector A DOMString containing one or more selectors to match.
    * @returns The first Element within the component's root element that matches the specified set of selectors, or null if no such element is found.
    */
-  protected ref<T extends HTMLElement>(selector: string): (T & { on?: (event: string, handler: EventListenerOrEventListenerObject) => T }) | null {
-    const el = this.el.querySelector<T>(selector);
-    if (el) {
-      // Attach a convenience 'on' method if not already present
-      if (!(el as any).on) {
-        (el as any).on = function(event: string, handler: EventListenerOrEventListenerObject) {
-          this.addEventListener(event, handler);
-          return this;
-        };
-      }
-    }
-    return el as any;
+  protected ref(selector: string): (HTMLElement & Partial<import('@/core/dom').DomChainableMethods>) | null {
+    return this.dom.ref(selector);
   }
 
   /**
@@ -35,8 +28,8 @@ export abstract class BaseComponent {
    * @param selector A DOMString containing one or more selectors to match.
    * @returns A static (not live) NodeList representing a list of elements matching the specified group of selectors. Returns an empty NodeList if no matches are found.
    */
-  protected refs<T extends HTMLElement>(selector: string): NodeListOf<T> {
-    return this.el.querySelectorAll<T>(selector);
+  protected refs(selector: string): NodeListOf<HTMLElement> {
+    return this.dom.refs(selector);
   }
 
   /**
