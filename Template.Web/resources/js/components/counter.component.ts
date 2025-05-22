@@ -13,24 +13,6 @@ interface CounterProps {
 }
 
 /**
- * _anotherMethodFunction (Private)
- *
- * An example utility function demonstrating service resolution and DOM manipulation.
- * This function is intended for internal use within the CounterComponent's scope.
- *
- * @param app - The application instance, used to resolve services.
- */
-// function _anotherMethodFunction(app: Application): void {
-//   const $ = useDom();
-//   console.log("_anotherMethodFunction called");
-//   $('body').toggleClass('another-method-triggered-functional');
-
-//   // Example of resolving a service from the application instance
-//   const myService = app.resolve<MyServiceType>('myServiceName');
-//   console.log(myService.getMessage());
-// }
-
-/**
  * @module CounterComponent
  * A class-based component that displays a counter with an increment button.
  *

@@ -1,5 +1,3 @@
-// filepath: d:\Webdev\Tchilly\Template.Web\resources\js\core\dom.ts
-
 export class Dom {
   public elements: HTMLElement[];
   private root: HTMLElement;

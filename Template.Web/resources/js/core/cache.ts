@@ -1,4 +1,9 @@
-// Simple in-memory cache store with TTL and tag support
+/**
+ * Cache library for storing and retrieving values with expiration and tagging support.
+ *
+ * This library provides a simple caching mechanism for storing and retrieving values.
+ * It supports different storage types (memory, localStorage, sessionStorage) and allows for setting expiration times and tags for cache entries.
+ */
 export interface CacheOptions {
   ttl?: number; // Time to live in milliseconds
   tag?: string; // Optional tag for group invalidation
