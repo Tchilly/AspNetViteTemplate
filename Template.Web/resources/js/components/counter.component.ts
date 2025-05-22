@@ -35,15 +35,15 @@ export default class CounterComponent extends BaseComponent {
   constructor(el: HTMLElement, app: Application) {
     super(el, app);
 
-    // Resolve the services
-    this.myService = this.app.resolve<MyServiceType>('myServiceName');
-    this.cache = this.app.resolve<CacheService>('cache');
+    // Resolve the services (type-safe, no generics needed)
+    this.myService = this.app.resolve('myServiceName');
+    this.cache = this.app.resolve('cache');
 
     // Define default props and cache for 10 seconds in localStorage
     const defaultProps = this.defineProps<CounterProps>(
       { initialCount: 1 },
       'counter-initial',
-      { ttl: 10000, tag: 'counter', storage: 'local' }
+      { ttl: 60, tag: 'counter', storage: 'local' }
     );
 
     this.props = this.useProps<CounterProps>(defaultProps);
@@ -53,6 +53,10 @@ export default class CounterComponent extends BaseComponent {
 
     // Counter display element
     this.countDisplay = this.ref('[data-counter-display]');
+
+    // Set a random key in the cache for demonstration, use cookie storage
+    this.cache.set('randomKey', 0, { ttl: 60, tag: 'random', storage: 'cookie' });
+    console.log('Cache set for randomKey:', this.cache.get('randomKey'));
 
     this.bindEvents();
     this.render();
