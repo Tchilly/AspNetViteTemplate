@@ -21,7 +21,9 @@ export interface CacheOptions {
   storage?: 'memory' | 'local' | 'cookie';
 }
 
-export type CacheDriverType = 'memory' | 'local' | 'session' | 'cookie';
+export interface CacheDriverTypeInterface {
+  type: 'memory' | 'local' | 'session' | 'cookie';
+}
 
 export interface ICacheDriver {
   set<T>(key: string, value: T, options?: CacheOptions): void;

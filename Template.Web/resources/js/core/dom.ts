@@ -182,8 +182,11 @@ export class Dom {
   /**
    * Finds the first element matching the selector within the root.
    * Adds all Dom methods as bound methods to the element, for chainable usage.
+   * If the element is not found, returns a proxy that safely no-ops all chainable methods.
+   *
+   * The returned value is always non-null and satisfies TypeScript's type system for chainable usage.
    */
-  ref(selector: string): (HTMLElement & Partial<DomChainableMethods>) | null {
+  ref(selector: string): HTMLElement & Required<DomChainableMethods> {
     const el = this.root.querySelector(selector) as HTMLElement | null;
     if (el) {
       const dom = new Dom(el);
@@ -243,13 +246,29 @@ export class Dom {
         show: () => { dom.show(); return el; }
       };
       Object.entries(methodMap).forEach(([name, fn]) => {
-        // Only assign if not a native property (avoid overwriting native DOM properties/getters)
         if (!(name in el)) {
           (el as any)[name] = fn;
         }
       });
+      return el as HTMLElement & Required<DomChainableMethods>;
     }
-    return el as any;
+    // Return a proxy that no-ops all chainable methods if element is not found
+    const noop = () => undefined;
+    const chainNoop = () => proxy;
+    const proxy = new Proxy({} as HTMLElement & Required<DomChainableMethods>, {
+      get: (prop) => {
+        if (typeof prop === 'string') {
+          if ([
+            'on', 'addClass', 'removeClass', 'toggleClass', 'text', 'html', 'append', 'find', 'children', 'parent',
+            'attr', 'removeAttr', 'val', 'css', 'each', 'get', 'first', 'hide', 'show'
+          ].includes(prop)) {
+            return chainNoop;
+          }
+        }
+        return noop;
+      }
+    });
+    return proxy;
   }
 
   /**

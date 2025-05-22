@@ -35,7 +35,7 @@ export default class CounterComponent extends BaseComponent {
   constructor(el: HTMLElement, app: Application) {
     super(el, app);
 
-    // Resolve the services (type-safe, no generics needed)
+    // Resolve the services
     this.myService = this.app.resolve('myServiceName');
     this.cache = this.app.resolve('cache');
 
@@ -48,7 +48,7 @@ export default class CounterComponent extends BaseComponent {
 
     this.props = this.useProps<CounterProps>(defaultProps);
 
-    // Ensure initialCount is a number, default to 0 if not
+    // Get the initial count from cache or use the default
     this.currentCount = this.cache.get('counter.currentCount', this.props.initialCount);
 
     // Counter display element
@@ -56,19 +56,19 @@ export default class CounterComponent extends BaseComponent {
 
     // Set a random key in the cache for demonstration, use cookie storage
     this.cache.set('randomKey', 0, { ttl: 60, tag: 'random', storage: 'cookie' });
-    console.log('Cache set for randomKey:', this.cache.get('randomKey'));
+    console.log('Cache set for randomKey:', this.cache.get('randomKey', null, { storage: 'cookie' }));
 
     this.bindEvents();
     this.render();
   }
 
   private bindEvents(): void {
-    this.ref('[data-counter-button]')?.on?.('click', () => this.increment());
-    this.ref('[data-counter-decrement]')?.on?.('click', () => this.decrement());
-    this.ref('[data-counter-reset]')?.on?.('click', () => this.reset());
-    this.ref('[data-counter-set150]')?.on?.('click', () => this.setCount(150));
-    this.ref('[data-counter-clearcache]')?.on?.('click', () => this.clearCache());
-    this.ref('[data-counter-fakefetch]')?.on?.('click', () => this.fakeFetch());
+    this.ref('[data-counter-button]').on('click', () => this.increment());
+    this.ref('[data-counter-decrement]').on('click', () => this.decrement());
+    this.ref('[data-counter-reset]').on('click', () => this.reset());
+    this.ref('[data-counter-set150]').on('click', () => this.setCount(150));
+    this.ref('[data-counter-clearcache]').on('click', () => this.clearCache());
+    this.ref('[data-counter-fakefetch]').on('click', () => this.fakeFetch());
   }
 
   private increment(): void {

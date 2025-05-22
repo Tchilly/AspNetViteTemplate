@@ -1,6 +1,12 @@
-export type ComponentConstructor = new (el: HTMLElement, app: Application) => any;
-export type ComponentLoader = () => Promise<{ default: ComponentConstructor }>;
-export type ServiceFactory = () => any;
+export interface ComponentConstructor {
+  new (el: HTMLElement, app: Application): any;
+}
+export interface ComponentLoader {
+  (): Promise<{ default: ComponentConstructor }>;
+}
+export interface ServiceFactory {
+  (): any;
+}
 
 export class Application {
   private components: Record<string, ComponentLoader> = {};

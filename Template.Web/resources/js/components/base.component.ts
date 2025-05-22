@@ -1,6 +1,6 @@
 import { Application } from "@/core/application";
 import { Props } from '@/core/props';
-import { Dom } from '@/core/dom';
+import { Dom, DomChainableMethods } from '@/core/dom';
 
 export abstract class BaseComponent {
   protected el: HTMLElement;
@@ -15,11 +15,11 @@ export abstract class BaseComponent {
 
   /**
    * Finds the first element that matches the specified selector string within the component's root element.
-   * Adds all Dom methods as bound methods to the element, for chainable usage.
+   * Returns a type-safe, always-chainable DomElementWrapper (never null).
    * @param selector A DOMString containing one or more selectors to match.
-   * @returns The first Element within the component's root element that matches the specified set of selectors, or null if no such element is found.
+   * @returns A DomElementWrapper for chainable DOM operations (safe even if no element is found).
    */
-  protected ref(selector: string): (HTMLElement & Partial<import('@/core/dom').DomChainableMethods>) | null {
+  protected ref(selector: string): HTMLElement & Required<DomChainableMethods> {
     return this.dom.ref(selector);
   }
 
