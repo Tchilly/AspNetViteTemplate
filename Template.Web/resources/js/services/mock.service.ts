@@ -6,10 +6,15 @@
  */
 export interface MyServiceType {
   getMessage(): string;
+  performAction(): void;
 }
 
-export class MockService {
+export class MockService implements MyServiceType {
   getMessage(): string {
     return "Hello from MockService!";
+  }
+
+  performAction(): void {
+    console.log("MockService action performed: Button was clicked!");
   }
 }

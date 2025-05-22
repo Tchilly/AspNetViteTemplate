@@ -1,8 +1,7 @@
-import { Application } from "../core/application";
-import type { MyServiceType } from '../services/mock.service';
-import { useDom } from '../composables/useDom'; // Assuming DOMWrapper is exported
-import { useProps } from '../composables/useProps';
-import type { DOMWrapper } from "../core/dom";
+import { Application } from "@/core/application";
+import { BaseComponent } from '@/components/base.component';
+import type { MyServiceType } from '@/services/mock.service';
+import { CacheService } from '@/core/cache';
 
 /**
  * @interface CounterProps
@@ -21,63 +20,84 @@ interface CounterProps {
  *
  * @param app - The application instance, used to resolve services.
  */
-function _anotherMethodFunction(app: Application): void {
-  const $ = useDom();
-  console.log("_anotherMethodFunction called");
-  $('body').toggleClass('another-method-triggered-functional');
+// function _anotherMethodFunction(app: Application): void {
+//   const $ = useDom();
+//   console.log("_anotherMethodFunction called");
+//   $('body').toggleClass('another-method-triggered-functional');
 
-  // Example of resolving a service from the application instance
-  const myService = app.resolve<MyServiceType>('myServiceName');
-  console.log(myService.getMessage());
-}
+//   // Example of resolving a service from the application instance
+//   const myService = app.resolve<MyServiceType>('myServiceName');
+//   console.log(myService.getMessage());
+// }
 
 /**
  * @module CounterComponent
- * A functional component that displays a counter with an increment button.
+ * A class-based component that displays a counter with an increment button.
  *
  * It initializes with a count, optionally provided via a `data-props` HTML attribute,
  * and allows the user to increment this count. It also demonstrates service
- * resolution and basic DOM manipulation using composables.
+ * resolution and basic DOM manipulation using the BaseController.
  *
  * @param el - The HTMLElement to which this component is bound.
  *             Expected to have a `data-component="counter"` attribute.
  *             Can also accept `data-props='{"initialCount": number}'` to set the initial counter value.
  * @param app - The global application instance, used for service resolution and other app-level interactions.
  */
-export default function CounterComponent(el: HTMLElement, app: Application): void {
-  const $ = useDom();
-  const { initialCount } = useProps<CounterProps>(el, { initialCount: 0 });
-  const elWrapper = $(el);
+export default class CounterComponent extends BaseComponent {
+  private countDisplay: HTMLElement | null;
+  private currentCount: number;
+  private myService: MyServiceType;
+  private props: CounterProps;
+  private cache: CacheService;
 
-  let currentCount: number = initialCount ?? 0;
+  constructor(el: HTMLElement, app: Application) {
+    super(el, app);
 
-  /**
-   * Updates the text of the count display element.
-   */
-  const updateCountDisplay = (countDisplay: DOMWrapper): void => {
-    countDisplay.text(`Count: ${currentCount} `);
-  };
+    // Resolve the services
+    this.myService = this.app.resolve<MyServiceType>('myServiceName');
+    this.cache = this.app.resolve<CacheService>('cache');
 
-  /**
-   * Initializes the counter UI, creates elements, and attaches necessary event handlers.
-   * This function is called once when the component is bootstrapped.
-   */
-  const initializeCounter = (): void => {
-    console.log('CounterComponent: Initializing UI on', el, 'with initialCount:', initialCount);
+    // Define default props and cache for 10 seconds in localStorage
+    const defaultProps = this.defineProps<CounterProps>(
+      { initialCount: 1 },
+      'counter-initial',
+      { ttl: 10000, tag: 'counter', storage: 'local' }
+    );
 
-    const countDisplay = elWrapper.find('[data-counter-display]');
-    const button = elWrapper.find('[data-counter-button]');
+    // Assign merged props from DOM (supports both direct and fluent usage)
+    this.props = this.useProps<CounterProps>().withDefaults(defaultProps);
+    console.log('CounterComponent props:', this.props);
 
-    updateCountDisplay(countDisplay);
+    // Restore count from cache if available, else use initialCount (using cache.get with fallback)
+    this.currentCount = this.cache.get('counter.currentCount', () => this.props.initialCount);
 
-    button.on('click', () => {
-      currentCount++;
-      updateCountDisplay(countDisplay);
-      console.log('Button clicked! Element:', button.elements, 'New count:', currentCount);
-      _anotherMethodFunction(app); // Call example utility function
-    });
-  };
+    // Counter display element
+    this.countDisplay = this.ref('[data-counter-display]');
 
-  // Initialize the component
-  initializeCounter();
+    this.bindEvents();
+    this.render();
+  }
+
+  private bindEvents(): void {
+    const button = this.ref('[data-counter-button]');
+    button?.addEventListener('click', () => this.increment());
+  }
+
+  private increment(): void {
+    this.currentCount++;
+    this.render();
+    // Persist count for 10 seconds in localStorage using this.cache
+    this.cache.set('counter.currentCount', this.currentCount);
+    if (this.myService) {
+      this.myService.performAction();
+    }
+    console.log('Button clicked! New count:', this.currentCount);
+  }
+
+  private render(): void {
+    if (this.countDisplay) {
+      this.countDisplay.textContent = `Count: ${this.currentCount} `;
+    }
+  }
+
 }
