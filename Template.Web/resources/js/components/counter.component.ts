@@ -64,12 +64,10 @@ export default class CounterComponent extends BaseComponent {
       { ttl: 10000, tag: 'counter', storage: 'local' }
     );
 
-    // Assign merged props from DOM (supports both direct and fluent usage)
-    this.props = this.useProps<CounterProps>().withDefaults(defaultProps);
-    console.log('CounterComponent props:', this.props);
+    this.props = this.useProps<CounterProps>(defaultProps);
 
-    // Restore count from cache if available, else use initialCount (using cache.get with fallback)
-    this.currentCount = this.cache.get('counter.currentCount', () => this.props.initialCount);
+    // Ensure initialCount is a number, default to 0 if not
+    this.currentCount = this.cache.get('counter.currentCount', this.props.initialCount);
 
     // Counter display element
     this.countDisplay = this.ref('[data-counter-display]');

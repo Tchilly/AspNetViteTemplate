@@ -1,5 +1,5 @@
 import { Application } from "@/core/application";
-import { Props, PropsBuilder, defineProps as definePropsHelper } from '@/core/props';
+import { Props, defineProps as definePropsHelper } from '@/core/props';
 import { getOr } from '@/core/cache';
 
 export abstract class BaseComponent {
@@ -36,7 +36,7 @@ export abstract class BaseComponent {
    */
   protected defineProps<T extends Record<string, any>>(defaults?: T, cacheKey?: string, cacheOptions?: Record<string, any>): T {
     // @ts-expect-error: cache is injected by convention in subclasses
-    return Props.defineProps(this.cache, defaults, cacheKey, cacheOptions);
+    return definePropsHelper(this.cache, defaults, cacheKey, cacheOptions);
   }
 
   /**
@@ -49,14 +49,29 @@ export abstract class BaseComponent {
 
   /**
    * Reads and merges props from the DOM element's data-props attribute with defaults.
-   * Supports both direct and fluent (withDefaults) usage.
+   *
+   * Usage:
+   *   this.useProps<T>({ key: 'value' })
+   *   - Merges the provided defaults with any data-props on the element.
+   *   - Returns the merged props object.
+   *   this.useProps<T>()
+   *   - Returns an empty object if no defaults are provided and no data-props exist.
+   *
+   * Note: Fluent usage (withDefaults) is no longer supported. Always provide defaults directly if needed.
    */
-  protected useProps<T extends Record<string, any>>(defaults: T): T;
-  protected useProps<T extends Record<string, any>>(): PropsBuilder<T>;
-  protected useProps<T extends Record<string, any>>(defaults?: T): T | PropsBuilder<T> {
+  protected useProps<T extends Record<string, any>>(defaults?: T): T {
     if (defaults !== undefined) {
-      return Props.useProps<T>(this.el, defaults);
+      const propsString = this.el.dataset.props;
+      try {
+        if (propsString) {
+          return { ...defaults, ...JSON.parse(propsString) };
+        }
+      } catch (error) {
+        console.error("Error parsing data-props JSON:", error, propsString);
+      }
+      return defaults;
     }
-    return new PropsBuilder<T>(this.el);
+    // If no defaults provided, return empty object
+    return {} as T;
   }
 }
