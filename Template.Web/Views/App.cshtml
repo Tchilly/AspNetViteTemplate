@@ -1,0 +1,30 @@
+@using InertiaCore
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Hosting
+@inject IWebHostEnvironment Env
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title inertia>Todo App</title>
+    <link rel="stylesheet" vite-href="~/js/app.tsx" />
+</head>
+<body class="bg-gray-50 text-gray-900">
+    @await Inertia.Html(Model)
+    @if (Env.IsDevelopment())
+    {
+        <script type="module">
+            import RefreshRuntime from "http://@(Context.Request.Host.Host):5173/@@react-refresh";
+            RefreshRuntime.injectIntoGlobalHook(window);
+            window.$RefreshReg$ = () => { };
+            window.$RefreshSig$ = () => (type) => type;
+            window.__vite_plugin_react_preamble_installed__ = true;
+        </script>
+    }
+    <script type="module" vite-src="~/js/app.tsx" asp-append-version="true"></script>
+</body>
+</html>

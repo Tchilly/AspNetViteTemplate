@@ -8,6 +8,7 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": false,
     "moduleDetection": "force",
@@ -25,5 +26,5 @@
       "@/*": ["resources/js/*"]
     }
   },
-  "include": ["resources/**/*.ts", "vite.config.ts"],
+  "include": ["resources/**/*.ts", "resources/**/*.tsx", "vite.config.ts"],
 }

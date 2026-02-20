@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @source "../../Views/**/*.cshtml";
 @source "../../TagHelpers/**/*.cs";
+@source "../js/**/*.{ts,tsx}";
 
 @layer base {
   input[type="button"],

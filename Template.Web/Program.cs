@@ -1,4 +1,6 @@
 using Vite.AspNetCore;
+using InertiaCore.Extensions;
+using Template.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var mvcBuilder = builder.Services.AddRazorPages();
@@ -7,6 +9,8 @@ var mvcBuilder = builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+builder.Services.AddInertia(options => options.RootView = "~/Views/App.cshtml");
+builder.Services.AddSingleton<ITodoStore, InMemoryTodoStore>();
 
 // Add the Vite services
 builder.Services.AddViteServices(options =>
@@ -35,11 +39,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseInertia();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Todos}/{action=Index}/{id?}");
 
 // Add Vite development server middleware in development environment
 if (app.Environment.IsDevelopment())
