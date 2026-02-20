@@ -3,7 +3,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using InertiaCore.Extensions;
 using Template.Web.Services;
-using Template.Web.Validators;
+using Template.Web.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var mvcBuilder = builder.Services.AddRazorPages();
@@ -16,7 +16,7 @@ builder.Services.AddInertia(options => options.RootView = "~/Views/App.cshtml");
 builder.Services.AddSingleton<ITodoStore, InMemoryTodoStore>();
 
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<TodoCreateRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<TodoCreateRequest>();
 
 // Add the Vite services
 builder.Services.AddViteServices(options =>
