@@ -1,10 +1,18 @@
-using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 
 namespace Template.Web.Models;
 
 public sealed class TodoCreateRequest
 {
-    [Required]
-    [StringLength(200)]
     public string Title { get; set; } = string.Empty;
+
+    public sealed class Validator : AbstractValidator<TodoCreateRequest>
+    {
+        public Validator()
+        {
+            RuleFor(x => x.Title)
+                .NotEmpty()
+                .MaximumLength(200);
+        }
+    }
 }

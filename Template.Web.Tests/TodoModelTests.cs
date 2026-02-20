@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Template.Web.Models;
 
 namespace Template.Web.Tests;
@@ -6,22 +5,48 @@ namespace Template.Web.Tests;
 public sealed class TodoModelTests
 {
     [Fact]
-    public void TodoCreateRequest_Requires_Title()
+    public void TodoCreateRequestValidator_Requires_Title()
     {
+        var validator = new TodoCreateRequest.Validator();
         var request = new TodoCreateRequest { Title = string.Empty };
 
-        var isValid = Validator.TryValidateObject(request, new ValidationContext(request), new List<ValidationResult>(), true);
+        var result = validator.Validate(request);
 
-        Assert.False(isValid);
+        Assert.False(result.IsValid);
+    }
+
+    [Theory]
+    [InlineData("   ")]
+    [InlineData("")]
+    public void TodoCreateRequestValidator_Rejects_Blank_Title(string title)
+    {
+        var validator = new TodoCreateRequest.Validator();
+        var request = new TodoCreateRequest { Title = title };
+
+        var result = validator.Validate(request);
+
+        Assert.False(result.IsValid);
     }
 
     [Fact]
-    public void TodoUpdateRequest_Rejects_Title_Over_200_Characters()
+    public void TodoCreateRequestValidator_Rejects_Title_Over_200_Characters()
     {
+        var validator = new TodoCreateRequest.Validator();
+        var request = new TodoCreateRequest { Title = new string('a', 201) };
+
+        var result = validator.Validate(request);
+
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public void TodoUpdateRequestValidator_Rejects_Title_Over_200_Characters()
+    {
+        var validator = new TodoUpdateRequest.Validator();
         var request = new TodoUpdateRequest { Title = new string('a', 201), IsCompleted = true };
 
-        var isValid = Validator.TryValidateObject(request, new ValidationContext(request), new List<ValidationResult>(), true);
+        var result = validator.Validate(request);
 
-        Assert.False(isValid);
+        Assert.False(result.IsValid);
     }
 }
