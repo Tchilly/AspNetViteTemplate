@@ -1,6 +1,7 @@
 import { defineConfig, type UserConfig } from 'vite'
 import { resolve } from 'path'
 import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
 
 
 export default defineConfig(({ command }) => {
@@ -33,7 +34,7 @@ export default defineConfig(({ command }) => {
         // For example, if your main TypeScript file is 'resources/js/main.ts'
         // and your main CSS file is 'resources/css/app.css'
         input: {
-          main: resolve(__dirname, 'resources/js/app.ts'),
+          main: resolve(__dirname, 'resources/js/app.tsx'),
           // You can add more entry points if needed, e.g., for CSS:
           // styles: resolve(__dirname, 'resources/css/app.css'),
         },
@@ -92,6 +93,7 @@ export default defineConfig(({ command }) => {
 
     // Add plugins if you are using them (e.g., for Vue, React, Tailwind CSS)
     plugins: [
+      react({ fastRefresh: false }),
       tailwindcss(),
     ],
   }

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.InertiaCore" Version="0.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.5" />
     <PackageReference Include="Vite.AspNetCore" Version="2.4.1" />
   </ItemGroup>
