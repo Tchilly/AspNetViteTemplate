@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Template.Web.Migrations
+namespace Template.Web.Database.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

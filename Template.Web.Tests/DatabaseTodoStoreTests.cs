@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Template.Web.Data;
+using Template.Web.Database.Seeders;
 
 namespace Template.Web.Tests;
 

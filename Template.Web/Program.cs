@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using InertiaCore.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Template.Web.Database.Seeders;
 using Template.Web.Data;
 using Template.Web.Services;
 using Template.Web.Models;
