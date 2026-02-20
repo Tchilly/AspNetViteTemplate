@@ -27,12 +27,18 @@ public sealed class TodosController : Controller
     [HttpPost("")]
     public IActionResult Store([FromBody] TodoCreateRequest request)
     {
+        var trimmedTitle = request.Title.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedTitle))
+        {
+            ModelState.AddModelError(nameof(request.Title), "The Title field is required.");
+        }
+
         if (!ModelState.IsValid)
         {
             return Index();
         }
 
-        _todoStore.Create(request.Title.Trim());
+        _todoStore.Create(trimmedTitle);
 
         return RedirectToAction(nameof(Index));
     }
@@ -40,12 +46,18 @@ public sealed class TodosController : Controller
     [HttpPut("{id:int}")]
     public IActionResult Update(int id, [FromBody] TodoUpdateRequest request)
     {
+        var trimmedTitle = request.Title.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedTitle))
+        {
+            ModelState.AddModelError(nameof(request.Title), "The Title field is required.");
+        }
+
         if (!ModelState.IsValid)
         {
             return Index();
         }
 
-        var todo = _todoStore.Update(id, request.Title.Trim(), request.IsCompleted);
+        var todo = _todoStore.Update(id, trimmedTitle, request.IsCompleted);
         if (todo is null)
         {
             return NotFound();

@@ -93,7 +93,7 @@ export default defineConfig(({ command }) => {
 
     // Add plugins if you are using them (e.g., for Vue, React, Tailwind CSS)
     plugins: [
-      react({ fastRefresh: false }),
+      react(),
       tailwindcss(),
     ],
   }
