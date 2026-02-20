@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Template.Web\Template.Web.csproj" />
+  </ItemGroup>
+
 </Project>

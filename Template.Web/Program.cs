@@ -3,7 +3,6 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using InertiaCore.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Template.Web.Database.Seeders;
 using Template.Web.Data;
 using Template.Web.Services;
 using Template.Web.Models;
@@ -58,21 +57,6 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
-
-// Handle "migrate:fresh --seed" command: drop, recreate and seed the database.
-if (args.Contains("migrate:fresh"))
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureDeleted();
-    db.Database.Migrate();
-    if (args.Contains("--seed"))
-    {
-        DbSeeder.Seed(db);
-    }
-    Console.WriteLine($"Database migrated{(args.Contains("--seed") ? " and seeded" : "")}.");
-    return;
-}
 
 // Apply pending migrations on startup.
 using (var scope = app.Services.CreateScope())

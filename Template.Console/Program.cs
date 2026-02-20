@@ -1,5 +1,8 @@
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
+using Template.Web.Database;
+using Template.Web.Database.Seeders;
 
 var runner = new ArtisanCli();
 return runner.Run(args);
@@ -33,6 +36,7 @@ internal sealed class ArtisanCli
             "make:controller" => MakeController(name),
             "make:model" => MakeModel(name),
             "make:migration" => MakeMigration(name),
+            "db:fresh" => MigrateFresh(args.Skip(1).ToArray()),
             _ => UnknownCommand(command)
         };
     }
@@ -123,6 +127,31 @@ public class {{modelName}}
         return RunProcess("dotnet", arguments, _solutionRoot);
     }
 
+    private int MigrateFresh(string[] args)
+    {
+        var seed = args.Contains("--seed", StringComparer.OrdinalIgnoreCase);
+        var originalDirectory = Environment.CurrentDirectory;
+        try
+        {
+            Directory.SetCurrentDirectory(_solutionRoot);
+            var factory = new AppDbContextFactory();
+            using var db = factory.CreateDbContext(Array.Empty<string>());
+            db.Database.EnsureDeleted();
+            db.Database.Migrate();
+            if (seed)
+            {
+                DbSeeder.Seed(db);
+            }
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(originalDirectory);
+        }
+
+        Console.WriteLine($"Database migrated{(seed ? " and seeded" : "")}.");
+        return 0;
+    }
+
     private int UnknownCommand(string command)
     {
         Console.WriteLine($"Unknown command: {command}");
@@ -177,6 +206,7 @@ Commands:
   make:controller <Name>   Create a controller in Template.Web/Controllers
   make:model <Name>        Create a model in Template.Web/Models
   make:migration <Name>    Run dotnet ef to add a migration into Database/Migrations
+  db:fresh [--seed]        Drop, migrate, and optionally seed the database
 """);
     }
 
