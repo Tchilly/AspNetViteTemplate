@@ -2,6 +2,8 @@ using Vite.AspNetCore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using InertiaCore.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Template.Web.Data;
 using Template.Web.Services;
 using Template.Web.Models;
 
@@ -13,7 +15,30 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddInertia(options => options.RootView = "~/Views/App.cshtml");
-builder.Services.AddSingleton<ITodoStore, InMemoryTodoStore>();
+
+// Configure database provider based on "Database:Provider" setting.
+// Use "sqlite" (default), "sqlserver", or "postgres".
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Data Source=app.db";
+var dbProvider = builder.Configuration["Database:Provider"] ?? "sqlite";
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    switch (dbProvider.ToLowerInvariant())
+    {
+        case "sqlserver":
+            options.UseSqlServer(connectionString);
+            break;
+        case "postgres":
+            options.UseNpgsql(connectionString);
+            break;
+        default:
+            options.UseSqlite(connectionString);
+            break;
+    }
+});
+
+builder.Services.AddScoped<ITodoStore, DatabaseTodoStore>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<TodoCreateRequest>();
@@ -32,6 +57,13 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
+
+// Apply pending migrations on startup.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
