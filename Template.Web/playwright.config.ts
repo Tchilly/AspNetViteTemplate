@@ -1,7 +1,15 @@
+import path from 'node:path';
+import { Module } from 'node:module';
 import { defineConfig, devices } from '@playwright/test';
 
+const nodeModulesPath = path.resolve(new URL('.', import.meta.url).pathname, 'node_modules');
+process.env.NODE_PATH = process.env.NODE_PATH
+  ? `${nodeModulesPath}${path.delimiter}${process.env.NODE_PATH}`
+  : nodeModulesPath;
+Module._initPaths();
+
 export default defineConfig({
-  testDir: './e2e',
+  testDir: '../Template.Web.Tests/browser',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
