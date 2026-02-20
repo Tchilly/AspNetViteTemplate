@@ -1,3 +1,4 @@
+using Microsoft.Extensions.FileProviders;
 using Vite.AspNetCore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -23,7 +24,7 @@ builder.Services.AddViteServices(options =>
 {
     options.Server.AutoRun = true;
     options.Server.Https = false;
-    options.Manifest = "manifest.json";
+    options.Manifest = "build/manifest.json";
 });
 
 if (builder.Environment.IsDevelopment())
@@ -44,6 +45,21 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// In non-development mode serve the Vite build artifacts (css/js) from wwwroot/build/ at the root path,
+// because the ViteTagHelper generates asset URLs without the /build/ prefix.
+if (!app.Environment.IsDevelopment())
+{
+    var buildPath = Path.Combine(app.Environment.WebRootPath, "build");
+    if (Directory.Exists(buildPath))
+    {
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(buildPath),
+            RequestPath = ""
+        });
+    }
+}
+
 app.UseRouting();
 app.UseInertia();
 app.UseAuthorization();
@@ -60,3 +76,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
+
+public partial class Program { }

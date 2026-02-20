@@ -58,6 +58,11 @@
 **/vite.config.ts.timestamp-*
 **/vite.config.js.timestamp-*
 
+# Playwright
+**/playwright-report/
+**/test-results/
+**/blob-report/
+
 # NuGet Packages
 *.nupkg
 # The packages folder can be ignored if it is committed to source control (used by GitHub Actions, Docker builds, etc.)
