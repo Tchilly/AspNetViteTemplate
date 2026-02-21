@@ -1,7 +1,39 @@
 import { defineConfig } from 'vite'
+import { readFileSync } from 'node:fs'
 import { resolve } from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+
+type SharedViteConfig = {
+  host: string
+  port: number
+}
+
+function loadSharedViteConfig(): SharedViteConfig {
+  const defaults: SharedViteConfig = {
+    host: 'localhost',
+    port: 5173,
+  }
+
+  try {
+    const appsettingsPath = resolve(__dirname, 'appsettings.json')
+    const appsettings = JSON.parse(readFileSync(appsettingsPath, 'utf8')) as {
+      Host?: { Name?: string }
+      Vite?: { Host?: string; Port?: number }
+    }
+
+    const sharedHost = appsettings.Host?.Name ?? defaults.host
+
+    return {
+      host: appsettings.Vite?.Host ?? sharedHost,
+      port: appsettings.Vite?.Port ?? defaults.port,
+    }
+  } catch {
+    return defaults
+  }
+}
+
+const sharedVite = loadSharedViteConfig()
 
 export default defineConfig(({ command }) => ({
   appType: 'custom',
@@ -32,14 +64,15 @@ export default defineConfig(({ command }) => ({
 
   server: {
     strictPort: true,
-    port: 5173,
+    host: sharedVite.host,
+    port: sharedVite.port,
     watch: {
       usePolling: true,
       interval: 120,
     },
     hmr: {
-      host: 'localhost',
-      port: 5173,
+      host: sharedVite.host,
+      port: sharedVite.port,
     },
   },
 

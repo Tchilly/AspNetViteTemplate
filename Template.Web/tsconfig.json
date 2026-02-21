@@ -16,6 +16,7 @@
 
     /* Linting */
     "strict": true,
+    "types": ["node"],
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
@@ -26,5 +27,5 @@
       "@/*": ["resources/js/*"]
     }
   },
-  "include": ["resources/**/*.ts", "resources/**/*.tsx", "vite.config.ts"],
+  "include": ["resources/**/*.ts", "resources/**/*.tsx", "vite.config.ts", "playwright.config.ts"],
 }

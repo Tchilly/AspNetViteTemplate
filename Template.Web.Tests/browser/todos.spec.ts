@@ -1,13 +1,21 @@
 import { test, expect, Page } from '@playwright/test';
 
-// Title inputs in the todo list have no explicit type attribute (defaults to text),
-// while checkboxes have type="checkbox". Use :not([type]) to select title inputs.
-const titleInput = 'ul li input:not([type])';
+function todoTitleInput(page: Page) {
+  return page.getByRole('textbox').last();
+}
+
+function todoDeleteButtons(page: Page) {
+  return page.getByRole('button', { name: 'Delete' });
+}
+
+function todoCheckbox(page: Page) {
+  return page.getByRole('checkbox').first();
+}
 
 async function clearTodos(page: Page) {
   // Delete all existing todos to start each test from a clean state
   while (true) {
-    const deleteButtons = page.getByRole('button', { name: 'Delete' });
+    const deleteButtons = todoDeleteButtons(page);
     if ((await deleteButtons.count()) === 0) break;
     await deleteButtons.first().click();
     await page.waitForLoadState('networkidle');
@@ -21,11 +29,11 @@ test.describe('Todos GUI', () => {
   });
 
   test('shows the page heading', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Todo App' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Todos' })).toBeVisible();
   });
 
   test('shows empty list when no todos exist', async ({ page }) => {
-    await expect(page.locator('ul li')).toHaveCount(0);
+    await expect(todoDeleteButtons(page)).toHaveCount(0);
   });
 
   test('adds a new todo', async ({ page }) => {
@@ -33,8 +41,8 @@ test.describe('Todos GUI', () => {
     await page.getByRole('button', { name: 'Add' }).click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('ul li')).toHaveCount(1);
-    await expect(page.locator(titleInput).first()).toHaveValue('Buy milk');
+    await expect(todoDeleteButtons(page)).toHaveCount(1);
+    await expect(todoTitleInput(page)).toHaveValue('Buy milk');
   });
 
   test('edits a todo title', async ({ page }) => {
@@ -44,11 +52,11 @@ test.describe('Todos GUI', () => {
     await page.waitForLoadState('networkidle');
 
     // Edit the title
-    await page.locator(titleInput).first().fill('Updated title');
+    await todoTitleInput(page).fill('Updated title');
     await page.getByRole('button', { name: 'Save' }).first().click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator(titleInput).first()).toHaveValue('Updated title');
+    await expect(todoTitleInput(page)).toHaveValue('Updated title');
   });
 
   test('marks a todo as completed', async ({ page }) => {
@@ -58,11 +66,11 @@ test.describe('Todos GUI', () => {
     await page.waitForLoadState('networkidle');
 
     // Check the checkbox and save
-    await page.locator('ul li input[type="checkbox"]').first().check();
+    await todoCheckbox(page).click();
     await page.getByRole('button', { name: 'Save' }).first().click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('ul li input[type="checkbox"]').first()).toBeChecked();
+    await expect(todoCheckbox(page)).toHaveAttribute('data-state', 'checked');
   });
 
   test('deletes a todo', async ({ page }) => {
@@ -71,13 +79,13 @@ test.describe('Todos GUI', () => {
     await page.getByRole('button', { name: 'Add' }).click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('ul li')).toHaveCount(1);
+    await expect(todoDeleteButtons(page)).toHaveCount(1);
 
     // Delete it
     await page.getByRole('button', { name: 'Delete' }).first().click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('ul li')).toHaveCount(0);
+    await expect(todoDeleteButtons(page)).toHaveCount(0);
   });
 
   test('add, edit, and delete a todo in sequence', async ({ page }) => {
@@ -85,17 +93,17 @@ test.describe('Todos GUI', () => {
     await page.getByPlaceholder('Add a todo...').fill('Sequential test');
     await page.getByRole('button', { name: 'Add' }).click();
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('ul li')).toHaveCount(1);
+    await expect(todoDeleteButtons(page)).toHaveCount(1);
 
     // Edit
-    await page.locator(titleInput).first().fill('Sequential test \u2013 edited');
+    await todoTitleInput(page).fill('Sequential test \u2013 edited');
     await page.getByRole('button', { name: 'Save' }).first().click();
     await page.waitForLoadState('networkidle');
-    await expect(page.locator(titleInput).first()).toHaveValue('Sequential test \u2013 edited');
+    await expect(todoTitleInput(page)).toHaveValue('Sequential test \u2013 edited');
 
     // Delete
     await page.getByRole('button', { name: 'Delete' }).first().click();
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('ul li')).toHaveCount(0);
+    await expect(todoDeleteButtons(page)).toHaveCount(0);
   });
 });

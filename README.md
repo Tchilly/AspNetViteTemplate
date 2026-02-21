@@ -184,7 +184,7 @@ For local development, use the launch profile so `ASPNETCORE_ENVIRONMENT=Develop
 dotnet run --project Template.Web --launch-profile https
 ```
 
-In development mode the Vite dev server starts automatically (via `Vite.AspNetCore`) and serves assets with HMR on `http://localhost:5173`. The app listens on `https://localhost:7001` and `http://localhost:5000` by default.
+In development mode the Vite dev server starts automatically (via `Vite.AspNetCore`). The hostname is shared through `Host:Name`, while ASP.NET and Vite use their own ports from `Template.Web/appsettings.json`.
 
 ---
 
@@ -259,6 +259,8 @@ npm run test:browser
 
 The `test:browser` script runs `vite build && dotnet build && playwright test`. To run Playwright directly (without the build steps), use `npm run playwright`. Playwright specs live in `Template.Web.Tests/browser/` and are driven via the config in `Template.Web/playwright.config.ts`.
 
+Playwright base URL and test web server URL are derived from `Host:Name` and `Host:HttpPort` in `Template.Web/appsettings.json`.
+
 ---
 
 ## Configuration — `appsettings.json`
@@ -270,11 +272,29 @@ Key settings in `Template.Web/appsettings.json`:
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=Database/app.db"
   },
+  "Host": {
+    "Name": "localhost",
+    "HttpPort": 5000,
+    "HttpsPort": 7001
+  },
+  "Vite": {
+    "Port": 5173
+  },
   "Database": {
     "Provider": "sqlite"
   }
 }
 ```
+
+### `Host` and `Vite`
+
+These values are used as the shared development host configuration:
+
+- `Host:Name`: shared hostname for ASP.NET and Vite.
+- `Host:HttpPort` + `Host:HttpsPort`: ASP.NET listen URLs (when `ASPNETCORE_URLS` is not set).
+- `Vite:Port`: Vite dev server + HMR port.
+
+If `ASPNETCORE_URLS` is set (for example by a launch profile or environment variable), it overrides `Host:HttpPort`/`Host:HttpsPort`.
 
 ### `Database:Provider`
 

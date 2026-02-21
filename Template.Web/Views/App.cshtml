@@ -1,9 +1,14 @@
 @using InertiaCore
 @using Microsoft.AspNetCore.Hosting
 @using Microsoft.Extensions.Hosting
+@using Microsoft.Extensions.Configuration
 @inject IWebHostEnvironment Env
+@inject IConfiguration Config
 @{
     Layout = null;
+    var sharedHost = Config["Host:Name"] ?? Context.Request.Host.Host;
+    var viteHost = Config["Vite:Host"] ?? sharedHost;
+    var vitePort = Config["Vite:Port"] ?? "5173";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -18,7 +23,7 @@
     @if (Env.IsDevelopment())
     {
         <script type="module">
-            import RefreshRuntime from "http://@(Context.Request.Host.Host):5173/@@react-refresh";
+            import RefreshRuntime from "http://@viteHost:@vitePort/@@react-refresh";
             RefreshRuntime.injectIntoGlobalHook(window);
             window.$RefreshReg$ = () => { };
             window.$RefreshSig$ = () => (type) => type;

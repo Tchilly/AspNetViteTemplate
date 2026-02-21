@@ -1,12 +1,31 @@
 import path from 'node:path';
-import { Module } from 'node:module';
+import { readFileSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
-const nodeModulesPath = path.resolve(new URL('.', import.meta.url).pathname, 'node_modules');
-process.env.NODE_PATH = process.env.NODE_PATH
-  ? `${nodeModulesPath}${path.delimiter}${process.env.NODE_PATH}`
-  : nodeModulesPath;
-Module._initPaths();
+type AppSettings = {
+  Host?: {
+    Name?: string;
+    HttpPort?: number;
+  };
+};
+
+function getSharedTestBaseUrl(): string {
+  const defaultHost = 'localhost';
+  const defaultPort = 5000;
+
+  try {
+    const appsettingsPath = path.resolve(new URL('.', import.meta.url).pathname, 'appsettings.json');
+    const appsettings = JSON.parse(readFileSync(appsettingsPath, 'utf8')) as AppSettings;
+    const host = appsettings.Host?.Name ?? defaultHost;
+    const port = appsettings.Host?.HttpPort ?? defaultPort;
+
+    return `http://${host}:${port}`;
+  } catch {
+    return `http://${defaultHost}:${defaultPort}`;
+  }
+}
+
+const sharedBaseUrl = getSharedTestBaseUrl();
 
 export default defineConfig({
   testDir: '../Template.Web.Tests/browser',
@@ -17,7 +36,7 @@ export default defineConfig({
   reporter: 'list',
 
   use: {
-    baseURL: 'http://localhost:5000',
+    baseURL: sharedBaseUrl,
     trace: 'on-first-retry',
   },
 
@@ -30,12 +49,12 @@ export default defineConfig({
 
   webServer: {
     command: 'dotnet run --no-launch-profile --no-build',
-    url: 'http://localhost:5000/todos',
+    url: `${sharedBaseUrl}/todos`,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
     env: {
       ASPNETCORE_ENVIRONMENT: 'Testing',
-      ASPNETCORE_URLS: 'http://localhost:5000',
+      ASPNETCORE_URLS: sharedBaseUrl,
     },
   },
 });

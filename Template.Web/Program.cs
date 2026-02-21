@@ -12,6 +12,17 @@ using Template.Web.Store;
 var builder = WebApplication.CreateBuilder(args);
 var mvcBuilder = builder.Services.AddRazorPages();
 
+var sharedHost = builder.Configuration["Host:Name"] ?? "localhost";
+var appHttpPort = builder.Configuration.GetValue<ushort?>("Host:HttpPort") ?? 5000;
+var appHttpsPort = builder.Configuration.GetValue<ushort?>("Host:HttpsPort") ?? 7001;
+
+if (string.IsNullOrWhiteSpace(builder.Configuration["ASPNETCORE_URLS"]))
+{
+    builder.WebHost.UseUrls(
+        $"http://{sharedHost}:{appHttpPort}",
+        $"https://{sharedHost}:{appHttpsPort}");
+}
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -50,10 +61,15 @@ builder.Services.AddScoped<ITodoStore, TodoStore>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<TodoCreateRequest>();
 
+var viteHost = builder.Configuration["Vite:Host"] ?? sharedHost;
+var vitePort = builder.Configuration.GetValue<ushort?>("Vite:Port") ?? 5173;
+
 // Add the Vite services
 builder.Services.AddViteServices(options =>
 {
     options.Server.AutoRun = true;
+    options.Server.Host = viteHost;
+    options.Server.Port = vitePort;
     options.Server.Https = false;
     options.Manifest = "build/manifest.json";
 });
