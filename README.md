@@ -1,4 +1,4 @@
-# AspNetViteTemplate
+# Inertia/React Powered .Net Core 10
 
 A full-stack web application template combining **ASP.NET Core MVC**, **Inertia.js**, **React**, and **Vite** — with an artisan-style CLI, EF Core multi-provider database support, and a complete test setup.
 

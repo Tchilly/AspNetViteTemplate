@@ -19,7 +19,7 @@ public class HomeController : Controller
     {
         return Inertia.Render("Home/Index", new
         {
-            appName = "AspNetViteTemplate",
+            appName = "Inertia/React Powered .Net Core 10",
         });
     }
 
