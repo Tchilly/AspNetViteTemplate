@@ -67,10 +67,17 @@ Migrations live in `Template.Web/Database/Migrations/`. EF Core is configured wi
 
 ## CLI — Template.Console
 
-`Template.Console` provides artisan-style commands for code generation and database management. Run it from anywhere inside the solution — it walks up the directory tree to find `Template.sln`.
+`Template.Console` provides `dn` commands for code generation and database management. Run it from anywhere inside the solution — it walks up the directory tree to find `Template.sln`.
 
 ```bash
 dotnet run --project Template.Console -- <command> [args]
+```
+
+For the short `dn` command from the web app folder, use the local launcher script:
+
+```bash
+cd Template.Web
+./dn <command> [args]
 ```
 
 ### Available Commands
@@ -80,23 +87,74 @@ dotnet run --project Template.Console -- <command> [args]
 | `make:controller <Name>` | Scaffold a controller in `Template.Web/Controllers/`          |
 | `make:model <Name>`      | Scaffold a model in `Template.Web/Models/`                    |
 | `make:migration <Name>`  | Add an EF Core migration via `dotnet ef`                      |
+| `make:request <Name>`    | Scaffold a request in `Template.Web/Requests/`                |
+| `make:factory <Name>`    | Scaffold a factory in `Template.Web/Database/Factories/`      |
+| `make:seeder <Name>`     | Scaffold a seeder in `Template.Web/Database/Seeders/`         |
 | `db:fresh [--seed]`      | Drop the database, re-run all migrations, and optionally seed |
 | `help`                   | Print the help message                                        |
+
+### `make:controller` modifiers
+
+| Modifier | Long form    | Scaffolds                                                                                               |
+| -------- | ------------ | ------------------------------------------------------------------------------------------------------- |
+| `-R`     | `--resource` | resource controller + store interface + store implementation + create/update requests + DI registration |
+
+### `make:model` modifiers
+
+| Modifier | Long form      | Scaffolds                                                                     |
+| -------- | -------------- | ----------------------------------------------------------------------------- |
+| `-a`     | `--all`        | model + resource controller + store + requests + factory + seeder + migration |
+| `-m`     | `--migration`  | migration                                                                     |
+| `-s`     | `--seeder`     | seeder                                                                        |
+| `-r`     | `--request`    | `<Model>CreateRequest` + `<Model>UpdateRequest`                               |
+| `-R`     | `--resource`   | resource controller + store + requests                                        |
+| `-c`     | `--controller` | controller                                                                    |
+| `-f`     | `--factory`    | factory                                                                       |
+
+Short modifiers can be combined, e.g. `-msr` is the same as `-m -s -r`.
 
 ### Examples
 
 ```bash
 # Create a new controller
-dotnet run --project Template.Console -- make:controller Products
+cd Template.Web
+./dn make:controller Products
+
+# Create a full resource controller + store scaffold
+./dn make:controller Products -R
 
 # Create a new model
-dotnet run --project Template.Console -- make:model Product
+./dn make:model Product
+
+# Create a model + migration + seeder
+./dn make:model Product -m -s
+
+# Laravel-style "all" scaffold
+./dn make:model Product -a
+
+# Create model + full resource stack explicitly
+./dn make:model Product -R
+
+# Create only request classes for the model
+./dn make:model Product -r
 
 # Add a new EF Core migration
-dotnet run --project Template.Console -- make:migration AddProductsTable
+./dn make:migration AddProductsTable
+
+# Create a request, factory, or seeder separately
+./dn make:request ProductRequest
+./dn make:factory Product
+./dn make:seeder Product
 
 # Reset the database and seed it with demo data
-dotnet run --project Template.Console -- db:fresh --seed
+./dn db:fresh --seed
+```
+
+Optional shell alias (Linux/macOS) so you can run `dn ...` without `./`:
+
+```bash
+echo "alias dn='$(pwd)/Template.Web/dn'" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 ---
