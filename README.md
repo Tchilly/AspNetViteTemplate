@@ -65,7 +65,7 @@ Migrations live in `Template.Web/Database/Migrations/`. EF Core is configured wi
 
 ---
 
-## CLI — Template.Console
+## CLI — dn
 
 `Template.Console` provides `dn` commands for code generation and database management. Run it from anywhere inside the solution — it walks up the directory tree to find `Template.sln`.
 
