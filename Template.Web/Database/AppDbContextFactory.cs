@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Template.Web.Data;
+using Microsoft.Data.Sqlite;
 
 namespace Template.Web.Database;
 
@@ -23,7 +23,12 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
             .Build();
 
         var provider = configuration["Database:Provider"] ?? "sqlite";
-        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? "Data Source=app.db";
+        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? "Data Source=Database/app.db";
+
+        if (provider.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
+        {
+            connectionString = ResolveSqliteConnectionString(connectionString, basePath);
+        }
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
@@ -41,5 +46,29 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
         }
 
         return new AppDbContext(optionsBuilder.Options);
+    }
+
+    private static string ResolveSqliteConnectionString(string connectionString, string basePath)
+    {
+        var sqliteBuilder = new SqliteConnectionStringBuilder(connectionString);
+        if (string.IsNullOrWhiteSpace(sqliteBuilder.DataSource))
+        {
+            return connectionString;
+        }
+
+        var dataSourcePath = sqliteBuilder.DataSource;
+        if (!Path.IsPathRooted(dataSourcePath))
+        {
+            dataSourcePath = Path.Combine(basePath, dataSourcePath);
+        }
+
+        var directoryPath = Path.GetDirectoryName(dataSourcePath);
+        if (!string.IsNullOrWhiteSpace(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+
+        sqliteBuilder.DataSource = dataSourcePath;
+        return sqliteBuilder.ToString();
     }
 }

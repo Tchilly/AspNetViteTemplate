@@ -1,4 +1,5 @@
 using Template.Web.Models;
+using Template.Web.Requests;
 
 namespace Template.Web.Tests;
 

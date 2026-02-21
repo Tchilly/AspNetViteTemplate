@@ -10,14 +10,13 @@ A full-stack web application template combining **ASP.NET Core MVC**, **Inertia.
 Template.sln
 ├── Template.Web          # ASP.NET Core web application (backend + frontend)
 │   ├── Controllers/      # MVC controllers
-│   ├── Data/             # EF Core DbContext and store implementations
 │   ├── Database/         # Migrations, seeders, and factories
-│   ├── Models/           # Request/response models with co-located validators
-│   ├── Services/         # Service interfaces and implementations
-│   ├── TagHelpers/       # Custom Razor tag helpers
+│   ├── Models/           # Domain/view models
+│   ├── Requests/         # Request DTOs with co-located validators
+│   ├── Store/            # Standardized EF Core CRUD store interfaces/impls
 │   ├── Views/            # Razor views (App.cshtml root for Inertia)
 │   ├── resources/        # Frontend source (TypeScript, React, CSS)
-│   │   ├── js/           # app.tsx entry point, Pages/, components/, services/
+│   │   ├── js/           # app.tsx entry point, Pages/, components/, lib/
 │   │   └── css/          # Tailwind CSS
 │   └── wwwroot/          # Static file root; Vite builds to wwwroot/build/
 ├── Template.Console      # Artisan-style CLI (code generation + DB management)
@@ -27,32 +26,41 @@ Template.sln
 
 ### Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Backend framework | ASP.NET Core 9 MVC |
-| SPA bridge | Inertia.js (`InertiaCore`) |
-| Frontend | React 19 + TypeScript |
-| CSS | Tailwind CSS v4 |
-| Build tool | Vite 6 |
-| ORM | Entity Framework Core 9 |
-| Validation | FluentValidation 11 |
-| Unit tests | xUnit |
-| E2E tests | Playwright |
+| Layer             | Technology                 |
+| ----------------- | -------------------------- |
+| Backend framework | ASP.NET Core 10 MVC        |
+| SPA bridge        | Inertia.js (`InertiaCore`) |
+| Frontend          | React 19 + TypeScript      |
+| CSS               | Tailwind CSS v4            |
+| UI components     | shadcn/ui + Radix UI       |
+| Build tool        | Vite 7                     |
+| ORM               | Entity Framework Core 10   |
+| Validation        | FluentValidation 11        |
+| Unit tests        | xUnit                      |
+| E2E tests         | Playwright                 |
 
 ---
 
 ## Design Patterns
 
 ### MVC + Inertia.js
+
 Controllers return `Inertia.Render("PageName", props)` instead of traditional Razor views. Inertia bridges the server and the React SPA without a separate API: on the first request it renders the full HTML shell (`Views/App.cshtml`); subsequent navigations are handled via XHR, swapping only the React page component.
 
-### Service Layer
-Business logic is abstracted behind interfaces (e.g. `ITodoStore`). The production implementation (`DatabaseTodoStore`) uses EF Core; the test implementation (`InMemoryTodoStore`) lives in `Template.Web` and is used by unit tests, keeping tests fast and database-free.
+### Shared App Layout
+
+Frontend pages use a shared layout component (`resources/js/components/layout/app-layout.tsx`) that now includes common top navigation for **Home**, **Privacy**, and **Todos**. This keeps cross-page navigation consistent while each page still controls its own title, description, and actions.
+
+### Store Layer
+
+CRUD operations are standardized behind store interfaces (e.g. `ITodoStore`) with methods like `All/Create/Update/Delete/Save`. Controllers stay small while EF Core remains the underlying persistence mechanism.
 
 ### Co-located Validation
+
 Request models carry their FluentValidation validator as a nested class (e.g. `TodoCreateRequest.Validator`). Validators are auto-discovered via `AddValidatorsFromAssemblyContaining<TodoCreateRequest>()` and wired up through `AddFluentValidationAutoValidation()`.
 
 ### Database Migrations
+
 Migrations live in `Template.Web/Database/Migrations/`. EF Core is configured with a design-time factory (`AppDbContextFactory`) so `dotnet ef` commands work without running the application. Pending migrations are applied automatically on startup via `db.Database.Migrate()`.
 
 ---
@@ -67,13 +75,13 @@ dotnet run --project Template.Console -- <command> [args]
 
 ### Available Commands
 
-| Command | Description |
-|---|---|
-| `make:controller <Name>` | Scaffold a controller in `Template.Web/Controllers/` |
-| `make:model <Name>` | Scaffold a model in `Template.Web/Models/` |
-| `make:migration <Name>` | Add an EF Core migration via `dotnet ef` |
-| `db:fresh [--seed]` | Drop the database, re-run all migrations, and optionally seed |
-| `help` | Print the help message |
+| Command                  | Description                                                   |
+| ------------------------ | ------------------------------------------------------------- |
+| `make:controller <Name>` | Scaffold a controller in `Template.Web/Controllers/`          |
+| `make:model <Name>`      | Scaffold a model in `Template.Web/Models/`                    |
+| `make:migration <Name>`  | Add an EF Core migration via `dotnet ef`                      |
+| `db:fresh [--seed]`      | Drop the database, re-run all migrations, and optionally seed |
+| `help`                   | Print the help message                                        |
 
 ### Examples
 
@@ -96,7 +104,8 @@ dotnet run --project Template.Console -- db:fresh --seed
 ## Backend Build & Run
 
 ### Prerequisites
-- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 
 ### Restore and build
 
@@ -111,13 +120,20 @@ dotnet build
 dotnet run --project Template.Web
 ```
 
-In development mode the Vite dev server starts automatically (via `Vite.AspNetCore`) and serves assets with HMR on `http://localhost:5173`. The application is available at `https://localhost:7XXX` / `http://localhost:5XXX` (ports printed on startup).
+For local development, use the launch profile so `ASPNETCORE_ENVIRONMENT=Development` is applied:
+
+```bash
+dotnet run --project Template.Web --launch-profile https
+```
+
+In development mode the Vite dev server starts automatically (via `Vite.AspNetCore`) and serves assets with HMR on `http://localhost:5173`. The app listens on `https://localhost:7001` and `http://localhost:5000` by default.
 
 ---
 
 ## Frontend Build
 
 ### Prerequisites
+
 - [Node.js 20+](https://nodejs.org/) and npm
 
 ### Install dependencies
@@ -145,6 +161,16 @@ cd Template.Web
 npm run build
 ```
 
+### Script quick reference
+
+| Script           | Command                | Purpose                                              |
+| ---------------- | ---------------------- | ---------------------------------------------------- |
+| Dev server       | `npm run dev`          | Starts the Vite development server                   |
+| Production build | `npm run build`        | Builds frontend assets to `wwwroot/build/`           |
+| Browser e2e      | `npm run test:browser` | Runs `vite build && dotnet build && playwright test` |
+| Playwright only  | `npm run playwright`   | Runs Playwright tests directly                       |
+| Preview build    | `npm run preview`      | Serves the latest built frontend bundle locally      |
+
 ---
 
 ## Running Tests
@@ -155,7 +181,7 @@ npm run build
 dotnet test
 ```
 
-Tests in `Template.Web.Tests` cover controllers, models, and the database store using the in-memory store and a real SQLite database (no network required).
+Tests in `Template.Web.Tests` cover controllers, models, and store behavior. Store tests run against EF Core's in-memory provider.
 
 ### End-to-end tests (Playwright)
 
@@ -170,10 +196,10 @@ Then run the full suite (builds the frontend and backend first, then starts the 
 
 ```bash
 cd Template.Web
-npm run test:e2e
+npm run test:browser
 ```
 
-The `test:e2e` script runs `vite build && dotnet build && playwright test`. Playwright specs live in `Template.Web.Tests/browser/` and are driven via the config in `Template.Web/playwright.config.ts`.
+The `test:browser` script runs `vite build && dotnet build && playwright test`. To run Playwright directly (without the build steps), use `npm run playwright`. Playwright specs live in `Template.Web.Tests/browser/` and are driven via the config in `Template.Web/playwright.config.ts`.
 
 ---
 
@@ -184,7 +210,7 @@ Key settings in `Template.Web/appsettings.json`:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=app.db"
+    "DefaultConnection": "Data Source=Database/app.db"
   },
   "Database": {
     "Provider": "sqlite"
@@ -196,13 +222,13 @@ Key settings in `Template.Web/appsettings.json`:
 
 Controls which EF Core database provider is used at runtime:
 
-| Value | Provider | Notes |
-|---|---|---|
-| `sqlite` (default) | Microsoft.EntityFrameworkCore.Sqlite | Uses the file path in `DefaultConnection` |
-| `sqlserver` | Microsoft.EntityFrameworkCore.SqlServer | Requires a SQL Server connection string |
-| `postgres` | Npgsql.EntityFrameworkCore.PostgreSQL | Note: the key is `postgres`, not `postgresql` |
+| Value              | Provider                                | Notes                                         |
+| ------------------ | --------------------------------------- | --------------------------------------------- |
+| `sqlite` (default) | Microsoft.EntityFrameworkCore.Sqlite    | Uses the file path in `DefaultConnection`     |
+| `sqlserver`        | Microsoft.EntityFrameworkCore.SqlServer | Requires a SQL Server connection string       |
+| `postgres`         | Npgsql.EntityFrameworkCore.PostgreSQL   | Note: the key is `postgres`, not `postgresql` |
 
-Override for a specific environment using `appsettings.Production.json` or environment variables:
+Override for a specific environment using environment variables (or additional `appsettings.{Environment}.json` files if you add them):
 
 ```bash
 # Environment variable override
@@ -210,11 +236,17 @@ Database__Provider=postgres
 ConnectionStrings__DefaultConnection="Host=localhost;Database=mydb;Username=user;Password=pass"
 ```
 
-### Environment-specific files
+### Notes
 
-| File | Purpose |
-|---|---|
-| `appsettings.json` | Base configuration (committed) |
-| `appsettings.Development.json` | Local dev overrides — **gitignored**, never committed |
-| `appsettings.Production.json` | Production overrides (committed; use environment variables for secrets) |
-| `appsettings.Testing.json` | Used by Playwright e2e tests |
+- This repository currently ships with a single config file: `Template.Web/appsettings.json`.
+- Playwright e2e uses environment variables from `playwright.config.ts` (`ASPNETCORE_ENVIRONMENT=Testing`, `ASPNETCORE_URLS=http://localhost:5000`) and does not require a dedicated `appsettings.Testing.json` file.
+
+---
+
+## Routes
+
+| Route      | Source                   | UI Page            |
+| ---------- | ------------------------ | ------------------ |
+| `/`        | `HomeController.Index`   | `Home/Index.tsx`   |
+| `/privacy` | `HomeController.Privacy` | `Home/Privacy.tsx` |
+| `/todos`   | `TodosController.Index`  | `Todos/Index.tsx`  |

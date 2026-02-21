@@ -1,4 +1,3 @@
-using Template.Web.Data;
 using Template.Web.Database.Factories;
 
 namespace Template.Web.Database.Seeders;

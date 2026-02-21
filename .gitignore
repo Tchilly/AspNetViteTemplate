@@ -38,6 +38,11 @@
 **/appsettings.Development.json
 **/secrets.json
 
+# Local SQLite databases
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
 # Node.js / Vite / TypeScript / Tailwind CSS
 **/node_modules/
 **/dist/

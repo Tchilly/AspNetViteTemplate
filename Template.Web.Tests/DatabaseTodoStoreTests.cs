@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Template.Web.Data;
+using Template.Web.Database;
 using Template.Web.Database.Seeders;
+using Template.Web.Store;
 
 namespace Template.Web.Tests;
 
-public sealed class DatabaseTodoStoreTests
+public sealed class TodoStoreTests
 {
     private static AppDbContext CreateDbContext()
     {
@@ -18,9 +19,9 @@ public sealed class DatabaseTodoStoreTests
     public void Create_AddsTodo_AndReturnsWithId()
     {
         using var db = CreateDbContext();
-        var store = new DatabaseTodoStore(db);
-
+        var store = new TodoStore(db);
         var todo = store.Create("Buy milk");
+        store.Save();
 
         Assert.NotEqual(0, todo.Id);
         Assert.Equal("Buy milk", todo.Title);
@@ -31,9 +32,10 @@ public sealed class DatabaseTodoStoreTests
     public void All_ReturnsAllTodos()
     {
         using var db = CreateDbContext();
-        var store = new DatabaseTodoStore(db);
+        var store = new TodoStore(db);
         store.Create("First");
         store.Create("Second");
+        store.Save();
 
         var todos = store.All();
 
@@ -44,13 +46,15 @@ public sealed class DatabaseTodoStoreTests
     public void Update_WithExistingId_UpdatesTodo_AndReturnsIt()
     {
         using var db = CreateDbContext();
-        var store = new DatabaseTodoStore(db);
+        var store = new TodoStore(db);
         var created = store.Create("Old title");
+        store.Save();
 
         var updated = store.Update(created.Id, "New title", true);
+        store.Save();
 
         Assert.NotNull(updated);
-        Assert.Equal("New title", updated.Title);
+        Assert.Equal("New title", updated!.Title);
         Assert.True(updated.IsCompleted);
     }
 
@@ -58,9 +62,8 @@ public sealed class DatabaseTodoStoreTests
     public void Update_WithMissingId_ReturnsNull()
     {
         using var db = CreateDbContext();
-        var store = new DatabaseTodoStore(db);
-
-        var result = store.Update(999, "Title", false);
+        var store = new TodoStore(db);
+        var result = store.Update(999, "Missing", false);
 
         Assert.Null(result);
     }
@@ -69,10 +72,12 @@ public sealed class DatabaseTodoStoreTests
     public void Delete_WithExistingId_RemovesTodo_AndReturnsTrue()
     {
         using var db = CreateDbContext();
-        var store = new DatabaseTodoStore(db);
+        var store = new TodoStore(db);
         var created = store.Create("Delete me");
+        store.Save();
 
         var deleted = store.Delete(created.Id);
+        store.Save();
 
         Assert.True(deleted);
         Assert.Empty(store.All());
@@ -82,8 +87,7 @@ public sealed class DatabaseTodoStoreTests
     public void Delete_WithMissingId_ReturnsFalse()
     {
         using var db = CreateDbContext();
-        var store = new DatabaseTodoStore(db);
-
+        var store = new TodoStore(db);
         var result = store.Delete(999);
 
         Assert.False(result);

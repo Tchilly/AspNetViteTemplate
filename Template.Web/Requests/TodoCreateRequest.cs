@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Template.Web.Models;
+namespace Template.Web.Requests;
 
 public sealed class TodoCreateRequest
 {

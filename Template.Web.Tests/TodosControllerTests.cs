@@ -1,29 +1,42 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Template.Web.Controllers;
+using Template.Web.Database;
 using Template.Web.Models;
-using Template.Web.Services;
+using Template.Web.Requests;
+using Template.Web.Store;
 
 namespace Template.Web.Tests;
 
 public sealed class TodosControllerTests
 {
+    private static AppDbContext CreateDbContext()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        return new AppDbContext(options);
+    }
+
     [Fact]
     public void Store_WithValidRequest_CreatesTodo_AndRedirects()
     {
-        var store = new InMemoryTodoStore();
+        using var db = CreateDbContext();
+        var store = new TodoStore(db);
         var controller = new TodosController(store);
 
         var result = controller.Store(new TodoCreateRequest { Title = "Buy milk" });
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(TodosController.Index), redirect.ActionName);
-        Assert.Single(store.All());
+        Assert.Single(db.Todos);
     }
 
     [Fact]
     public void Delete_WithMissingTodo_ReturnsNotFound()
     {
-        var store = new InMemoryTodoStore();
+        using var db = CreateDbContext();
+        var store = new TodoStore(db);
         var controller = new TodosController(store);
 
         var result = controller.Delete(999);
@@ -34,8 +47,11 @@ public sealed class TodosControllerTests
     [Fact]
     public void Update_WithValidRequest_UpdatesTodo_AndRedirects()
     {
-        var store = new InMemoryTodoStore();
-        var created = store.Create("Old title");
+        using var db = CreateDbContext();
+        var created = new Todo { Title = "Old title", IsCompleted = false };
+        db.Todos.Add(created);
+        db.SaveChanges();
+        var store = new TodoStore(db);
         var controller = new TodosController(store);
 
         var result = controller.Update(created.Id, new TodoUpdateRequest { Title = "New title", IsCompleted = true });
@@ -43,7 +59,7 @@ public sealed class TodosControllerTests
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(TodosController.Index), redirect.ActionName);
 
-        var todo = Assert.Single(store.All());
+        var todo = Assert.Single(db.Todos);
         Assert.Equal("New title", todo.Title);
         Assert.True(todo.IsCompleted);
     }
@@ -51,14 +67,17 @@ public sealed class TodosControllerTests
     [Fact]
     public void Delete_WithExistingTodo_RemovesTodo_AndRedirects()
     {
-        var store = new InMemoryTodoStore();
-        var created = store.Create("Delete me");
+        using var db = CreateDbContext();
+        var created = new Todo { Title = "Delete me", IsCompleted = false };
+        db.Todos.Add(created);
+        db.SaveChanges();
+        var store = new TodoStore(db);
         var controller = new TodosController(store);
 
         var result = controller.Delete(created.Id);
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(TodosController.Index), redirect.ActionName);
-        Assert.Empty(store.All());
+        Assert.Empty(db.Todos);
     }
 }

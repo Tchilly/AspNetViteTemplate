@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using InertiaCore;
 using Microsoft.AspNetCore.Mvc;
 using Template.Web.Models;
 
@@ -13,16 +14,22 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    [HttpGet("/")]
     public IActionResult Index()
     {
-        return View();
+        return Inertia.Render("Home/Index", new
+        {
+            appName = "AspNetViteTemplate",
+        });
     }
 
+    [HttpGet("/privacy")]
     public IActionResult Privacy()
     {
-        return View();
+        return Inertia.Render("Home/Privacy");
     }
 
+    [HttpGet("/error")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

@@ -1,5 +1,10 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { router, useForm } from '@inertiajs/react';
+import { AppLayout } from '@/components/layout/app-layout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 
 type Todo = {
   id: number;
@@ -44,39 +49,49 @@ export default function Index({ todos }: Props) {
   };
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold">Todo App</h1>
+    <AppLayout
+      title="Todos"
+      description="Create, update, and delete todos with Inertia + shadcn/ui."
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>Add Todo</CardTitle>
+          <CardDescription>Create a new todo item.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={submitCreate} className="flex gap-2">
+            <Input
+              className="flex-1"
+              value={createForm.data.title}
+              onChange={(event) => createForm.setData('title', event.target.value)}
+              placeholder="Add a todo..."
+            />
+            <Button type="submit">Add</Button>
+          </form>
+          {createForm.errors.title && (
+            <p className="mt-2 text-sm text-destructive">{createForm.errors.title}</p>
+          )}
+        </CardContent>
+      </Card>
 
-      <form onSubmit={submitCreate} className="mt-6 flex gap-2">
-        <input
-          className="flex-1 rounded border border-gray-300 px-3 py-2"
-          value={createForm.data.title}
-          onChange={(event) => createForm.setData('title', event.target.value)}
-          placeholder="Add a todo..."
-        />
-        <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white">Add</button>
-      </form>
-      {createForm.errors.title && <p className="mt-2 text-sm text-red-600">{createForm.errors.title}</p>}
-
-      <ul className="mt-6 space-y-3">
+      <div className="mt-6 space-y-3">
         {todos.map((todo) => {
           const draft = drafts[todo.id] ?? todo;
 
           return (
-            <li key={todo.id} className="rounded border border-gray-200 bg-white p-3">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
+            <Card key={todo.id} className="py-4">
+              <CardContent className="flex items-center gap-3 px-4">
+                <Checkbox
                   checked={draft.isCompleted}
-                  onChange={(event) =>
+                  onCheckedChange={(checked) =>
                     setDrafts((current) => ({
                       ...current,
-                      [todo.id]: { ...draft, isCompleted: event.target.checked },
+                      [todo.id]: { ...draft, isCompleted: checked === true },
                     }))
                   }
                 />
-                <input
-                  className="flex-1 rounded border border-gray-300 px-2 py-1"
+                <Input
+                  className="flex-1"
                   value={draft.title}
                   onChange={(event) =>
                     setDrafts((current) => ({
@@ -85,25 +100,20 @@ export default function Index({ todos }: Props) {
                     }))
                   }
                 />
-                <button
-                  type="button"
-                  className="rounded bg-emerald-600 px-3 py-1 text-white"
-                  onClick={() => saveTodo(todo.id)}
-                >
+                <Button variant="secondary" onClick={() => saveTodo(todo.id)}>
                   Save
-                </button>
-                <button
-                  type="button"
-                  className="rounded bg-red-600 px-3 py-1 text-white"
+                </Button>
+                <Button
+                  variant="destructive"
                   onClick={() => router.delete(`/todos/${todo.id}`, { preserveScroll: true })}
                 >
                   Delete
-                </button>
-              </div>
-            </li>
+                </Button>
+              </CardContent>
+            </Card>
           );
         })}
-      </ul>
-    </main>
+      </div>
+    </AppLayout>
   );
 }

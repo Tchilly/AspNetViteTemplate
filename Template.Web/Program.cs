@@ -1,12 +1,13 @@
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Data.Sqlite;
 using Vite.AspNetCore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using InertiaCore.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Template.Web.Data;
-using Template.Web.Services;
-using Template.Web.Models;
+using Template.Web.Database;
+using Template.Web.Requests;
+using Template.Web.Store;
 
 var builder = WebApplication.CreateBuilder(args);
 var mvcBuilder = builder.Services.AddRazorPages();
@@ -20,8 +21,13 @@ builder.Services.AddInertia(options => options.RootView = "~/Views/App.cshtml");
 // Configure database provider based on "Database:Provider" setting.
 // Use "sqlite" (default), "sqlserver", or "postgres".
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Data Source=app.db";
+    ?? "Data Source=Database/app.db";
 var dbProvider = builder.Configuration["Database:Provider"] ?? "sqlite";
+
+if (dbProvider.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
+{
+    connectionString = ResolveSqliteConnectionString(connectionString, builder.Environment.ContentRootPath);
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -39,7 +45,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     }
 });
 
-builder.Services.AddScoped<ITodoStore, DatabaseTodoStore>();
+builder.Services.AddScoped<ITodoStore, TodoStore>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<TodoCreateRequest>();
@@ -98,7 +104,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Todos}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // Add Vite development server middleware in development environment
 if (app.Environment.IsDevelopment())
@@ -108,5 +114,29 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
+
+static string ResolveSqliteConnectionString(string connectionString, string basePath)
+{
+    var sqliteBuilder = new SqliteConnectionStringBuilder(connectionString);
+    if (string.IsNullOrWhiteSpace(sqliteBuilder.DataSource))
+    {
+        return connectionString;
+    }
+
+    var dataSourcePath = sqliteBuilder.DataSource;
+    if (!Path.IsPathRooted(dataSourcePath))
+    {
+        dataSourcePath = Path.Combine(basePath, dataSourcePath);
+    }
+
+    var directoryPath = Path.GetDirectoryName(dataSourcePath);
+    if (!string.IsNullOrWhiteSpace(directoryPath))
+    {
+        Directory.CreateDirectory(directoryPath);
+    }
+
+    sqliteBuilder.DataSource = dataSourcePath;
+    return sqliteBuilder.ToString();
+}
 
 public partial class Program { }

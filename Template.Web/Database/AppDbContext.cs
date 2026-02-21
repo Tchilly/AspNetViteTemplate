@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Template.Web.Models;
 
-namespace Template.Web.Data;
+namespace Template.Web.Database;
 
 public sealed class AppDbContext : DbContext
 {
